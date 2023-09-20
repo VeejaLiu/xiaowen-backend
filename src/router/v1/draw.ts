@@ -10,7 +10,7 @@ router.post('', async (req, res) => {
     const { prompt } = req.body;
     const result = await draw(prompt);
 
-    const filePath = path.join(__dirname, `./${result.fileName}`);
+    const filePath = path.join(__dirname, `../../public/${result.fileName}`);
     const stream = fs.createReadStream(filePath);
 
     res.set('Content-Type', 'image/jpeg');
