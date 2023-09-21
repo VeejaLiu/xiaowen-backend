@@ -1,10 +1,14 @@
 # xiaowen-backend
+
+Node and npm version:
 ```
-Node - V18.21.0
-NPM - V6.14.15
+node: 18.12.1
+npm: 8.19.2
 ```
 
+Quick start:
 ```
-npm install
+npm i
 
+npm run start
 ```
