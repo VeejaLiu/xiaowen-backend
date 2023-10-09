@@ -1,5 +1,4 @@
 import express from 'express';
-import { draw } from '../../service/draw';
 import path from 'path';
 import fs from 'fs';
 import { putObject } from '../../clients/minio/minio';
