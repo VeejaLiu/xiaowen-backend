@@ -5,7 +5,7 @@ export function banner(log: Logger): void {
     if (env.app.banner) {
         const route = () => `${env.app.schema}://${env.app.host}:${env.app.port}`;
         log.info(``);
-        log.info(`Aloha, your app is ready on ${route()}${env.app.routePrefix}`);
+        log.info(`App is ready on ${route()}${env.app.routePrefix}`);
         log.info(`To shut it down, press <CTRL> + C at any time.`);
         log.info(``);
         log.info('-------------------------------------------------------');

@@ -1,14 +1,21 @@
 import express from 'express';
+import { draw } from '../../service/draw';
+import path from 'path';
+import fs from 'fs';
+import { putObject } from '../../clients/minio/minio';
 
 const fetch = require('node-fetch');
 const router = express.Router();
 
 import { Logger } from '../../lib/logger';
-const logger = new Logger(__filename);
+const log = new Logger(__filename);
 
 router.post('', async (req, res) => {
-    logger.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
+    log.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
     const { prompt } = req.body;
+    // const result = await draw(prompt);
+
+    // const filePath = path.join(__dirname, `../../public/${result.fileName}`);
 
     const response = await fetch('http://127.0.0.1:10102/draw', {
         method: 'POST',
