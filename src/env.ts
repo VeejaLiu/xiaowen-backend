@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 import * as pkg from '../package.json';
-import { getOsEnv, getOsEnvOptional, normalizePort, toBool } from './lib/env';
+import { getOsEnv, getOsEnvOptional, normalizePort, toBool, toNumber } from './lib/env';
 
 /**
  * Load .env file or for tests the .env.test file.
@@ -39,5 +39,13 @@ export const env = {
         route: getOsEnv('MONITOR_ROUTE'),
         username: getOsEnv('MONITOR_USERNAME'),
         password: getOsEnv('MONITOR_PASSWORD'),
+    },
+    minio: {
+        endPoint: getOsEnv('MINIO_ENDPOINT'),
+        port: toNumber(getOsEnv('MINIO_PORT')),
+        useSSL: toBool(getOsEnv('MINIO_USE_SSL')),
+        accessKey: getOsEnv('MINIO_ACCESS_KEY'),
+        secretKey: getOsEnv('MINIO_SECRET_KEY'),
+        bucketName: getOsEnv('MINIO_BUCKET_NAME'),
     },
 };
