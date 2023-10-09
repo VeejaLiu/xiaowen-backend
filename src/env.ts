@@ -40,6 +40,14 @@ export const env = {
         username: getOsEnv('MONITOR_USERNAME'),
         password: getOsEnv('MONITOR_PASSWORD'),
     },
+    mysql: {
+        host: getOsEnv('MYSQL_HOST'),
+        port: toNumber(getOsEnv('MYSQL_PORT')),
+        database: getOsEnv('MYSQL_DATABASE'),
+        username: getOsEnv('MYSQL_USERNAME'),
+        password: getOsEnv('MYSQL_PASSWORD'),
+        logging: toBool(getOsEnv('MYSQL_LOGGING')),
+    },
     minio: {
         endPoint: getOsEnv('MINIO_ENDPOINT'),
         port: toNumber(getOsEnv('MINIO_PORT')),
