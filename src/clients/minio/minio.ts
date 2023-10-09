@@ -1,21 +1,38 @@
-import Minio from 'minio';
+import * as Minio from 'minio';
 import { env } from '../../env';
+import { Logger } from '../../lib/logger';
+
+const log = new Logger(__filename);
 
 // Instantiate the minio client with the endpoint and access keys as shown below.
 const minioClient = new Minio.Client({
     endPoint: env.minio.endPoint || '127.0.0.1',
     port: env.minio.port || 9000,
-    useSSL: env.minio.useSSL || true,
-    // accessKey: 'fwxPczjUDixUPv7AdzmB',
-    // secretKey: '',
+    useSSL: env.minio.useSSL || false,
     accessKey: env.minio.accessKey,
     secretKey: env.minio.secretKey,
 });
 
 const BUCKET_NAME = env.minio.bucketName || 'pictures';
 
-export async function putObject(objectName: string, buffer: Buffer) {
-    // putObject(bucketName, objectName, stream, size, metaData[, callback])
-    // Uploads an object from a stream/Buffer.
-    await minioClient.putObject(BUCKET_NAME, objectName, buffer);
+export async function putObject(objectName: string, buffer: Buffer): Promise<boolean> {
+    try {
+        objectName = `${new Date().valueOf()}_${objectName}`;
+        log.info(`putObject() objectName=[${objectName}]`);
+
+        const UploadedObjectInfo = await minioClient.putObject(BUCKET_NAME, objectName, buffer);
+        log.info('putObject() successfully, Result', UploadedObjectInfo);
+        return true;
+    } catch (e) {
+        log.error('putObject() error', e);
+        return false;
+    }
+}
+
+export async function getObject(objectName: string) {
+    // Downloads an object as a stream.
+    const dataStream = await minioClient.getObject(BUCKET_NAME, objectName);
+    // dataStream to buffer
+    // const buffer = await streamToBuffer(dataStream);
+    return dataStream;
 }
