@@ -56,4 +56,10 @@ export const env = {
         secretKey: getOsEnv('MINIO_SECRET_KEY'),
         bucketName: getOsEnv('MINIO_BUCKET_NAME'),
     },
+    baiduTranslation: {
+        appid: getOsEnv('BAIDU_TRANSLATION_APP_ID'),
+        key: getOsEnv('BAIDU_TRANSLATION_SECRET_KEY'),
+        endpoint: getOsEnv('BAIDU_TRANSLATION_ENDPOINT'),
+        path: getOsEnv('BAIDU_TRANSLATION_PATH'),
+    },
 };
