@@ -6,6 +6,7 @@ export const USER_QUOTA_HISTORY = {
 
     CHANGE_REASON: {
         ADD: {
+            REGISTER: 0, // 初始注册赠予
             WATCH_AD: 1, // 观看广告
             BUY: 2, // 购买
             INVITE_REGISTER: 3, // 邀请注册

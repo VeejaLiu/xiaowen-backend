@@ -2,8 +2,7 @@ import express from 'express';
 import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { draw } from '../../clients/generate-server/generate';
-import PromptHistory from '../../models/schema/prompt_history';
-import UserGenerateHistory from '../../models/schema/user_generate_history';
+import { PromptHistory, UserGenerateHistory } from '../../models';
 
 const router = express.Router();
 const log = new Logger(__filename);
@@ -17,7 +16,9 @@ router.post('', async (req, res) => {
 
     // TODO check this user's quota
 
-    // prompt process
+    /*
+     * prompt process
+     */
     prompt = prompt.trim();
     if (!prompt || prompt.length === 0) {
         log.error(`[API_LOGS][/draw] prompt is empty`);
@@ -25,12 +26,13 @@ router.post('', async (req, res) => {
     }
     const transRes = await translate(prompt);
 
-    // create prompt history
+    /*
+     * create prompt history record
+     */
     const promptHistory = await PromptHistory.create({
         prompt: prompt,
         prompt_english: transRes,
     });
-    // create generate history
     const generateHistory = await UserGenerateHistory.create({
         user_id: user_id,
         style: style,
@@ -38,6 +40,10 @@ router.post('', async (req, res) => {
         status: 0,
         images: '',
     });
+
+    /*
+     * draw
+     */
     const result = await draw({ style: style, prompt: transRes });
 
     // update generate history
