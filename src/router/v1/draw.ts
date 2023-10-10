@@ -3,7 +3,7 @@ import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { draw } from '../../clients/generate-server/generate';
 import PromptHistory from '../../models/schema/prompt_history';
-import UserGenerateHistory from '../../models/schema/user-generate-history';
+import User_generate_history from '../../models/schema/user_generate_history';
 
 const router = express.Router();
 const log = new Logger(__filename);
@@ -31,7 +31,7 @@ router.post('', async (req, res) => {
         prompt_english: transRes,
     });
     // create generate history
-    const generateHistory = await UserGenerateHistory.create({
+    const generateHistory = await User_generate_history.create({
         user_id: user_id,
         style: style,
         prompt_history_id: promptHistory.id,
