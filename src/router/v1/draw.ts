@@ -1,37 +1,54 @@
 import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import { putObject } from '../../clients/minio/minio';
-
-const fetch = require('node-fetch');
-const router = express.Router();
-
 import { Logger } from '../../lib/logger';
+import { translate } from '../../clients/baidu-translate/BaiduTranslate';
+import { draw } from '../../clients/generate-server/generate';
+import PromptHistory from '../../models/schema/prompt_history';
+import UserGenerateHistory from '../../models/schema/user_generate_history';
+
+const router = express.Router();
 const log = new Logger(__filename);
 
+/**
+ * Draw
+ */
 router.post('', async (req, res) => {
     log.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
-    const { prompt } = req.body;
-    // const result = await draw(prompt);
+    let { user_id, style, prompt } = req.body;
 
-    // const filePath = path.join(__dirname, `../../public/${result.fileName}`);
+    // TODO check this user's quota
 
-    const response = await fetch('http://127.0.0.1:10102/draw', {
-        method: 'POST',
-        // request a image
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            prompt: `${prompt}`,
-        }),
+    // prompt process
+    prompt = prompt.trim();
+    if (!prompt || prompt.length === 0) {
+        log.error(`[API_LOGS][/draw] prompt is empty`);
+        return res.status(400).send('prompt is empty');
+    }
+    const transRes = await translate(prompt);
+
+    // create prompt history
+    const promptHistory = await PromptHistory.create({
+        prompt: prompt,
+        prompt_english: transRes,
     });
-    const buffer = await response.buffer();
-    const base64 = buffer.toString('base64');
+    // create generate history
+    const generateHistory = await UserGenerateHistory.create({
+        user_id: user_id,
+        style: style,
+        prompt_history_id: promptHistory.id,
+        status: 0,
+        images: '',
+    });
+    const result = await draw({ style: style, prompt: transRes });
 
-    // result is an image in base64 format
-    // res.set('Content-Type', 'image/png');
-    res.send(buffer);
+    // update generate history
+    await generateHistory.update({
+        images: JSON.stringify(result.images),
+        generate_used_time: result.used_time,
+    });
+
+    // TODO consume user's quota
+
+    res.send(result);
 });
 
 export default router;

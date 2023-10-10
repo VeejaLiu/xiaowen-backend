@@ -7,10 +7,11 @@ CREATE TABLE `user_generate_history` (
   `user_id` varchar(36) DEFAULT NULL COMMENT '用户id',
   `style` int NOT NULL DEFAULT '0' COMMENT '风格',
   `prompt_history_id` bigint NOT NULL COMMENT 'prompt_history表的id',
+  `status` int DEFAULT '0' COMMENT '生成状态',
   `generate_used_time` int NOT NULL DEFAULT '0' COMMENT '生成所用时间,单位毫秒',
   `images` text NOT NULL COMMENT '生成的图片objectName, 是个string数组Json',
   `is_private` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否私有',
-  `is_stared` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否收藏',
+  `is_starred` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否收藏',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -35,6 +36,11 @@ const UserGenerateHistorySchema: ModelAttributes = {
         type: Sequelize.BIGINT,
         allowNull: false,
     },
+    status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+    },
     generate_used_time: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -49,7 +55,7 @@ const UserGenerateHistorySchema: ModelAttributes = {
         allowNull: false,
         defaultValue: 0,
     },
-    is_stared: {
+    is_starred: {
         type: Sequelize.TINYINT,
         allowNull: false,
         defaultValue: 0,
@@ -74,10 +80,11 @@ class UserGenerateHistory extends Model {
     public user_id!: string | null;
     public style!: number;
     public prompt_history_id!: bigint;
+    public status!: number;
     public generate_used_time!: number;
     public images!: string;
     public is_private!: boolean;
-    public is_stared!: boolean;
+    public is_starred!: boolean;
     public is_deleted!: boolean;
     public create_time!: Date;
     public update_time!: Date;
