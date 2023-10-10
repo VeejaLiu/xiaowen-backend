@@ -35,6 +35,7 @@ router.post('', async (req, res) => {
         user_id: user_id,
         style: style,
         prompt_history_id: promptHistory.id,
+        status: 0,
         images: '',
     });
     const result = await draw({ style: style, prompt: transRes });
