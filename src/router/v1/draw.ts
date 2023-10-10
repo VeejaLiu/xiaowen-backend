@@ -2,8 +2,7 @@ import express from 'express';
 import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { draw } from '../../clients/generate-server/generate';
-import PromptHistory from '../../models/schema/prompt_history';
-import UserGenerateHistory from '../../models/schema/user_generate_history';
+import { PromptHistory, UserGenerateHistory } from '../../models';
 
 const router = express.Router();
 const log = new Logger(__filename);
