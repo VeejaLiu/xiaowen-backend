@@ -1,11 +1,55 @@
 import express from 'express';
 import { Logger } from '../../lib/logger';
 import { sequelize } from '../../models/db-config';
+import { User, UserQuota, UserQuotaHistory } from '../../models';
+import { v4 as uuidv4 } from 'uuid';
+import { USER_QUOTA_HISTORY } from '../../constant/user_quota_history';
 
 const router = express.Router();
 
 const log = new Logger(__filename);
 
+/**
+ * @api {post} /user/register 用户注册
+ */
+router.post('/register', async (req, res) => {
+    log.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
+    const { openId, appId, unionId, sessionKey, accessKey } = req.body;
+
+    /*
+     * Create a new user
+     */
+    const newUser = await User.create({
+        user_id: uuidv4(),
+        appid: appId,
+        openid: openId,
+        unionid: unionId,
+        session_key: sessionKey,
+        access_token: accessKey,
+    });
+
+    /*
+     * Init user quota
+     */
+    await UserQuotaHistory.create({
+        user_id: newUser.user_id,
+        quota_before: 0,
+        quota_after: 200,
+        change_amount: 200,
+        change_type: USER_QUOTA_HISTORY.CHANGE_TYPE.ADD,
+        change_reason: USER_QUOTA_HISTORY.CHANGE_REASON.ADD.REGISTER,
+    });
+    await UserQuota.create({
+        user_id: newUser.user_id,
+        quota: 200,
+    });
+
+    res.status(200).send();
+});
+
+/**
+ * @api {get} /user/history 获取用户生成历史
+ */
 router.get('/history', async (req, res) => {
     log.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
     const { userId, keyword, style, start, limit } = req.query;
