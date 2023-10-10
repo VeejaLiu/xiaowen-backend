@@ -75,7 +75,7 @@ const UserGenerateHistorySchema: ModelAttributes = {
     },
 };
 
-class User_generate_history extends Model {
+class UserGenerateHistory extends Model {
     public id!: number;
     public user_id!: string | null;
     public style!: number;
@@ -90,10 +90,10 @@ class User_generate_history extends Model {
     public update_time!: Date;
 }
 
-User_generate_history.init(UserGenerateHistorySchema, {
+UserGenerateHistory.init(UserGenerateHistorySchema, {
     ...Defaultconfig,
     sequelize,
     modelName: 'user_generate_history',
 });
 
-export default User_generate_history;
+export default UserGenerateHistory;
