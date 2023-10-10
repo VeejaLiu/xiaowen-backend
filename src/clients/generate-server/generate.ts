@@ -31,4 +31,14 @@ export async function draw(body: { style: TATTOO_STYLE; prompt: string }) {
         }),
     });
     return await response.json();
+
+    // return {
+    //     images: [
+    //         `tattoo/${new Date().valueOf()}_1.jpg`,
+    //         `tattoo/${new Date().valueOf()}_2.jpg`,
+    //         `tattoo/${new Date().valueOf()}_3.jpg`,
+    //         `tattoo/${new Date().valueOf()}_4.jpg`,
+    //     ],
+    //     used_time: 3000,
+    // };
 }
