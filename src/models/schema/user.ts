@@ -5,6 +5,8 @@ import { sequelize, Defaultconfig } from '../db-config';
 CREATE TABLE `user` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` varchar(36) DEFAULT NULL,
+  `nickname` varchar(255) DEFAULT NULL COMMENT '用户昵称',
+  `avatar_url` varchar(500) DEFAULT NULL COMMENT '用户头像地址',
   `appid` varchar(255) NOT NULL DEFAULT '',
   `openid` varchar(255) NOT NULL DEFAULT '',
   `unionid` varchar(255) NOT NULL DEFAULT '',
@@ -23,6 +25,12 @@ const UserSchema: ModelAttributes = {
     },
     user_id: {
         type: Sequelize.STRING(36),
+    },
+    nickname: {
+        type: Sequelize.STRING(255),
+    },
+    avatar_url: {
+        type: Sequelize.STRING(500),
     },
     appid: {
         type: Sequelize.STRING(255),
@@ -50,6 +58,8 @@ const UserSchema: ModelAttributes = {
 class User extends Model {
     public id!: number;
     public user_id!: string;
+    public nickname!: string;
+    public avatar_url!: string;
     public appid!: string;
     public openid!: string;
     public unionid!: string;

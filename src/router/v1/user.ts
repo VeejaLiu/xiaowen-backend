@@ -3,23 +3,44 @@ import { Logger } from '../../lib/logger';
 import { sequelize } from '../../models/db-config';
 import { User, UserQuota, UserQuotaHistory } from '../../models';
 import { v4 as uuidv4 } from 'uuid';
-import { USER_QUOTA_HISTORY } from '../../constant/user_quota_history';
+import { USER_QUOTA_HISTORY } from '../../constant';
 
 const router = express.Router();
 
 const log = new Logger(__filename);
 
 /**
+ * @api {get} /user/info 获取用户信息
+ */
+router.get('/info', async (req, res) => {
+    log.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
+    const { userId } = req.query;
+
+    const user = await User.findOne({ where: { user_id: userId } });
+    const userQuota = await UserQuota.findOne({ where: { user_id: userId } });
+
+    res.status(200).send({
+        userId: user.user_id,
+        nickname: user.nickname,
+        avatarUrl: user.avatar_url,
+        createTime: user.create_time,
+        quota: userQuota.quota,
+    });
+});
+
+/**
  * @api {post} /user/register 用户注册
  */
 router.post('/register', async (req, res) => {
     log.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
-    const { openId, appId, unionId, sessionKey, accessKey } = req.body;
+    const { nickname, avatarUrl, openId, appId, unionId, sessionKey, accessKey } = req.body;
 
     /*
      * Create a new user
      */
     const newUser = await User.create({
+        nickname: nickname,
+        avatar_url: avatarUrl,
         user_id: uuidv4(),
         appid: appId,
         openid: openId,
@@ -67,10 +88,10 @@ router.get('/history', async (req, res) => {
                  left join prompt_history as ph
                            on ugh.prompt_history_id = ph.id
         WHERE ugh.user_id = '${userId}'
-          AND ugh.style = '${style}'
-          AND ph.prompt LIKE '%${keyword}%'
+            ${style ? `AND ugh.style = '${style}'` : ''}
+            ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
         ORDER BY ugh.id DESC
-        LIMIT ${Number(limit) || 0}, ${Number(start) || 10};
+        LIMIT ${Number(start) || 0}, ${Number(limit) || 10};
     `);
     const countSqlRes = await sequelize.query(`
         select count(ugh.id) as count
@@ -78,8 +99,8 @@ router.get('/history', async (req, res) => {
                  left join prompt_history as ph
                            on ugh.prompt_history_id = ph.id
         WHERE ugh.user_id = '${userId}'
-          AND ugh.style = '${style}'
-          AND ph.prompt LIKE '%${keyword}%';
+            ${style ? `AND ugh.style = '${style}'` : ''}
+            ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
     `);
 
     res.status(200).send({
