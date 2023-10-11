@@ -3,6 +3,7 @@ import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { draw } from '../../clients/generate-server/generate';
 import { PromptHistory, UserGenerateHistory } from '../../models';
+import { USER_QUOTA_HISTORY } from '../../constant';
 
 const router = express.Router();
 const log = new Logger(__filename);
@@ -37,7 +38,7 @@ router.post('', async (req, res) => {
         user_id: user_id,
         style: style,
         prompt_history_id: promptHistory.id,
-        status: 0,
+        status: USER_QUOTA_HISTORY.STATUS.ONGOING,
         images: '',
     });
 
@@ -48,6 +49,7 @@ router.post('', async (req, res) => {
 
     // update generate history
     await generateHistory.update({
+        status: USER_QUOTA_HISTORY.STATUS.SUCCESS,
         images: JSON.stringify(result.images),
         generate_used_time: result.used_time,
     });

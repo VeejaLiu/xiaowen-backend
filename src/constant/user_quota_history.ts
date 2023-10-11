@@ -1,4 +1,9 @@
 export const USER_QUOTA_HISTORY = {
+    STATUS: {
+        ONGOING: 0, // 生成中
+        SUCCESS: 1, // 生成成功
+        FAILED: 2, // 生成失败
+    },
     CHANGE_TYPE: {
         ADD: 1, // 增加
         SUBTRACT: 2, // 减少
