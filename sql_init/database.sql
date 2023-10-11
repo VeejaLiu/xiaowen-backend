@@ -4,20 +4,22 @@ CREATE DATABASE IF NOT EXISTS xiaowen_ai DEFAULT CHARACTER SET utf8mb4 DEFAULT C
 USE xiaowen_ai;
 
 # user table
-CREATE TABLE `user`
+create table user
 (
-    `id`           bigint       NOT NULL AUTO_INCREMENT,
-    `user_id`      varchar(36)           DEFAULT NULL,
-    `appid`        varchar(255) NOT NULL DEFAULT '',
-    `openid`       varchar(255) NOT NULL DEFAULT '',
-    `unionid`      varchar(255) NOT NULL DEFAULT '',
-    `session_key`  varchar(255) NOT NULL DEFAULT '',
-    `access_token` varchar(255) NOT NULL DEFAULT '',
-    `create_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `update_time`  datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
+    id           bigint auto_increment
+        primary key,
+    user_id      varchar(36)                            null,
+    nickname     varchar(255)                           null comment '用户昵称',
+    avatar_url   varchar(500)                           null comment '用户头像地址',
+    appid        varchar(255) default ''                not null comment '小程序appid',
+    openid       varchar(255) default ''                not null comment '小程序openid',
+    unionid      varchar(255) default ''                not null comment '小程序unionid',
+    session_key  varchar(255) default ''                not null comment '小程序session_key',
+    access_token varchar(255) default ''                not null comment '小程序access_token',
+    create_time  datetime     default CURRENT_TIMESTAMP not null,
+    update_time  datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
+)
+    charset = utf8mb4;
 
 
 # generate history table
