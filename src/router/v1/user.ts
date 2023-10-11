@@ -3,7 +3,7 @@ import { Logger } from '../../lib/logger';
 import { sequelize } from '../../models/db-config';
 import { User, UserQuota, UserQuotaHistory } from '../../models';
 import { v4 as uuidv4 } from 'uuid';
-import { USER_QUOTA_HISTORY } from '../../constant/user_quota_history';
+import { USER_QUOTA_HISTORY } from '../../constant';
 
 const router = express.Router();
 
