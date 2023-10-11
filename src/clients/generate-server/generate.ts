@@ -18,7 +18,10 @@ export enum TATTOO_STYLE {
  * @param body
  * @returns images path of minio, `bucketName/objectName`
  */
-export async function draw(body: { style: TATTOO_STYLE; prompt: string }) {
+export async function draw(body: {
+    style: TATTOO_STYLE;
+    prompt: string;
+}): Promise<{ images: string[]; used_time: number }> {
     const response = await fetch('http://127.0.0.1:10102/draw', {
         method: 'POST',
         // request a image
