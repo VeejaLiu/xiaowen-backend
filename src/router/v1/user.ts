@@ -10,16 +10,37 @@ const router = express.Router();
 const log = new Logger(__filename);
 
 /**
+ * @api {get} /user/info 获取用户信息
+ */
+router.get('/info', async (req, res) => {
+    log.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
+    const { userId } = req.query;
+
+    const user = await User.findOne({ where: { user_id: userId } });
+    const userQuota = await UserQuota.findOne({ where: { user_id: userId } });
+
+    res.status(200).send({
+        userId: user.user_id,
+        nickname: user.nickname,
+        avatarUrl: user.avatar_url,
+        createTime: user.create_time,
+        quota: userQuota.quota,
+    });
+});
+
+/**
  * @api {post} /user/register 用户注册
  */
 router.post('/register', async (req, res) => {
     log.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
-    const { openId, appId, unionId, sessionKey, accessKey } = req.body;
+    const { nickname, avatarUrl, openId, appId, unionId, sessionKey, accessKey } = req.body;
 
     /*
      * Create a new user
      */
     const newUser = await User.create({
+        nickname: nickname,
+        avatar_url: avatarUrl,
         user_id: uuidv4(),
         appid: appId,
         openid: openId,
