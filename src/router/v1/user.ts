@@ -4,10 +4,73 @@ import { sequelize } from '../../models/db-config';
 import { User, UserQuota, UserQuotaHistory } from '../../models';
 import { v4 as uuidv4 } from 'uuid';
 import { USER_QUOTA_HISTORY } from '../../constant';
+import { getOsEnv } from '../../lib/env';
 
 const router = express.Router();
 
 const log = new Logger(__filename);
+
+/**
+ * @api {get} /user/info 获取用户信息
+ */
+router.get('/login', async (req, res) => {
+    const appId = getOsEnv('APP_ID');
+    const appSecret = getOsEnv('APP_SECRET');
+
+    const { code } = req.query;
+
+    // 调用https://api.weixin.qq.com/sns/jscode2session接口获取openid
+    const wxRes = await fetch(
+        `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`,
+        {
+            method: 'GET',
+        },
+    )
+        .then((res) => res.json())
+        .catch((err) => {
+            log.error(`[API_LOGS][/info] ${err}`);
+            res.status(500).send();
+        });
+
+    //如果返回值中有errcode，说明调用失败
+    if (wxRes.errcode) {
+        log.error(`[API_LOGS][/info] ${wxRes.errmsg}`);
+        res.status(500).send();
+    } else {
+        const { openid, session_key } = wxRes.data;
+
+        //查询数据库中是否有该用户
+        await User.findOne({ where: { openid: openid } })
+            .then(async (user) => {
+                if (user) {
+                    res.status(200).send({
+                        nickname: user.nickname,
+                        token: 'xxx',
+                    });
+                } else {
+                    //如果没有该用户，创建一个新用户
+                    const newUser = await User.create({
+                        nickname: 'wx_' + uuidv4().substring(0, 8),
+                        avatar_url: '',
+                        user_id: uuidv4(),
+                        appid: appId,
+                        openid: openid,
+                        unionid: '',
+                        session_key: session_key,
+                        access_token: '',
+                    });
+                    res.status(200).send({
+                        nickname: newUser.nickname,
+                        token: 'xxx',
+                    });
+                }
+            })
+            .catch((err) => {
+                log.error(`[API_LOGS][/info] ${err}`);
+                res.status(500).send();
+            });
+    }
+});
 
 /**
  * @api {get} /user/info 获取用户信息
