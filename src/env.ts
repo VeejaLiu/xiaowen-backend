@@ -66,4 +66,7 @@ export const env = {
         appid: getOsEnv('WECHAT_MINI_PROGRAM_APP_ID'),
         secret: getOsEnv('WECHAT_MINI_PROGRAM_SECRET'),
     },
+    secret: {
+        jwt: getOsEnv('SECRET_JWT'),
+    },
 };
