@@ -1,69 +1,21 @@
 import express from 'express';
 import { Logger } from '../../lib/logger';
 import { sequelize } from '../../models/db-config';
-import { User, UserQuota, UserQuotaHistory } from '../../models';
-import { v4 as uuidv4 } from 'uuid';
-import { USER_QUOTA_HISTORY } from '../../constant';
-import { getOsEnv } from '../../lib/env';
-import { WechatApis } from '../../clients/wechat/WechatApis';
+import { User, UserQuota } from '../../models';
+import { verifyToken } from '../../lib/token/verifyToken';
 
 const router = express.Router();
-
 const logger = new Logger(__filename);
 
-const appId = getOsEnv('APP_ID');
+router.use(verifyToken);
 
 /**
  * @api {get} /user/info 获取用户信息
  */
-router.post('/login', async (req, res) => {
-    const { code } = req.body;
-    const wxRes = await WechatApis.code2session(code);
-    const { openid, session_key } = wxRes;
-    logger.info(`[API_LOGS][/login] ${JSON.stringify(wxRes)}`);
-
-    //查询数据库中是否有该用户
-    const user = await User.findOne({ where: { openid: openid } });
-
-    const result: {
-        nickname?: string;
-        token?: string;
-        createTime?: string;
-    } = {};
-    if (user) {
-        logger.info(`[API_LOGS][/login] Login success, user_id: ${user.user_id}, openid: ${openid}`);
-        //如果有该用户
-        result.nickname = user.nickname;
-        result.token = 'xxx';
-        result.createTime = user.create_time.toUTCString();
-    } else {
-        logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
-        //如果没有该用户，创建一个新用户
-        const newUser = await User.create({
-            nickname: 'wx_' + uuidv4().substring(0, 8),
-            avatar_url: '',
-            user_id: uuidv4(),
-            appid: appId,
-            openid: openid,
-            unionid: '',
-            session_key: session_key,
-            access_token: '',
-        });
-        logger.info(`[API_LOGS][/login] New user created, user_id: ${newUser.user_id}, openid: ${openid}`);
-        result.nickname = newUser.nickname;
-        result.token = 'xxx';
-        result.createTime = newUser.create_time.toUTCString();
-    }
-
-    res.status(200).send(result);
-});
-
-/**
- * @api {get} /user/info 获取用户信息
- */
-router.get('/info', async (req, res) => {
+router.get('/info', async (req: any, res) => {
     logger.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
-    const { userId } = req.query;
+    const { userId } = req.user.user_id;
+    logger.info(`[API_LOGS][/info] userId: ${userId}`);
 
     const user = await User.findOne({ where: { user_id: userId } });
     const userQuota = await UserQuota.findOne({ where: { user_id: userId } });
@@ -120,9 +72,11 @@ router.get('/info', async (req, res) => {
 /**
  * @api {get} /user/history 获取用户生成历史
  */
-router.get('/history', async (req, res) => {
+router.get('/history', async (req: any, res) => {
     logger.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
-    const { userId, keyword, style, start, limit } = req.query;
+    const { keyword, style, start, limit } = req.query;
+    const { userId } = req.user.user_id;
+    logger.info(`[API_LOGS][/history] userId: ${userId}`);
 
     const sqlRes = await sequelize.query(`
         select ugh.id                 as id,
