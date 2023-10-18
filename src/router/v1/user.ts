@@ -5,78 +5,64 @@ import { User, UserQuota, UserQuotaHistory } from '../../models';
 import { v4 as uuidv4 } from 'uuid';
 import { USER_QUOTA_HISTORY } from '../../constant';
 import { getOsEnv } from '../../lib/env';
+import { WechatApis } from '../../clients/wechat/WechatApis';
 
 const router = express.Router();
 
-const log = new Logger(__filename);
+const logger = new Logger(__filename);
+
+const appId = getOsEnv('APP_ID');
 
 /**
  * @api {get} /user/info 获取用户信息
  */
-router.get('/login', async (req, res) => {
-    const appId = getOsEnv('APP_ID');
-    const appSecret = getOsEnv('APP_SECRET');
+router.post('/login', async (req, res) => {
+    const { code } = req.body;
+    const wxRes = await WechatApis.code2session(code);
+    const { openid, session_key } = wxRes;
+    logger.info(`[API_LOGS][/login] ${JSON.stringify(wxRes)}`);
 
-    const { code } = req.query;
+    //查询数据库中是否有该用户
+    const user = await User.findOne({ where: { openid: openid } });
 
-    // 调用https://api.weixin.qq.com/sns/jscode2session接口获取openid
-    const wxRes = await fetch(
-        `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`,
-        {
-            method: 'GET',
-        },
-    )
-        .then((res) => res.json())
-        .catch((err) => {
-            log.error(`[API_LOGS][/info] ${err}`);
-            res.status(500).send();
-        });
-
-    //如果返回值中有errcode，说明调用失败
-    if (wxRes.errcode) {
-        log.error(`[API_LOGS][/info] ${wxRes.errmsg}`);
-        res.status(500).send();
+    const result: {
+        nickname?: string;
+        token?: string;
+        createTime?: string;
+    } = {};
+    if (user) {
+        logger.info(`[API_LOGS][/login] Login success, user_id: ${user.user_id}, openid: ${openid}`);
+        //如果有该用户
+        result.nickname = user.nickname;
+        result.token = 'xxx';
+        result.createTime = user.create_time.toUTCString();
     } else {
-        const { openid, session_key } = wxRes.data;
-
-        //查询数据库中是否有该用户
-        await User.findOne({ where: { openid: openid } })
-            .then(async (user) => {
-                if (user) {
-                    res.status(200).send({
-                        nickname: user.nickname,
-                        token: 'xxx',
-                    });
-                } else {
-                    //如果没有该用户，创建一个新用户
-                    const newUser = await User.create({
-                        nickname: 'wx_' + uuidv4().substring(0, 8),
-                        avatar_url: '',
-                        user_id: uuidv4(),
-                        appid: appId,
-                        openid: openid,
-                        unionid: '',
-                        session_key: session_key,
-                        access_token: '',
-                    });
-                    res.status(200).send({
-                        nickname: newUser.nickname,
-                        token: 'xxx',
-                    });
-                }
-            })
-            .catch((err) => {
-                log.error(`[API_LOGS][/info] ${err}`);
-                res.status(500).send();
-            });
+        logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
+        //如果没有该用户，创建一个新用户
+        const newUser = await User.create({
+            nickname: 'wx_' + uuidv4().substring(0, 8),
+            avatar_url: '',
+            user_id: uuidv4(),
+            appid: appId,
+            openid: openid,
+            unionid: '',
+            session_key: session_key,
+            access_token: '',
+        });
+        logger.info(`[API_LOGS][/login] New user created, user_id: ${newUser.user_id}, openid: ${openid}`);
+        result.nickname = newUser.nickname;
+        result.token = 'xxx';
+        result.createTime = newUser.create_time.toUTCString();
     }
+
+    res.status(200).send(result);
 });
 
 /**
  * @api {get} /user/info 获取用户信息
  */
 router.get('/info', async (req, res) => {
-    log.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
+    logger.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
     const { userId } = req.query;
 
     const user = await User.findOne({ where: { user_id: userId } });
@@ -95,7 +81,7 @@ router.get('/info', async (req, res) => {
  * @api {post} /user/register 用户注册
  */
 router.post('/register', async (req, res) => {
-    log.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
+    logger.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
     const { nickname, avatarUrl, openId, appId, unionId, sessionKey, accessKey } = req.body;
 
     /*
@@ -135,7 +121,7 @@ router.post('/register', async (req, res) => {
  * @api {get} /user/history 获取用户生成历史
  */
 router.get('/history', async (req, res) => {
-    log.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
+    logger.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
     const { userId, keyword, style, start, limit } = req.query;
 
     const sqlRes = await sequelize.query(`
