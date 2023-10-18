@@ -62,4 +62,11 @@ export const env = {
         endpoint: getOsEnv('BAIDU_TRANSLATION_ENDPOINT'),
         path: getOsEnv('BAIDU_TRANSLATION_PATH'),
     },
+    wechatMiniProgram: {
+        appid: getOsEnv('WECHAT_MINI_PROGRAM_APP_ID'),
+        secret: getOsEnv('WECHAT_MINI_PROGRAM_SECRET'),
+    },
+    secret: {
+        jwt: getOsEnv('SECRET_JWT'),
+    },
 };
