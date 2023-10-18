@@ -1,5 +1,6 @@
 import { getOsEnv } from '../../lib/env';
 import { Logger } from '../../lib/logger';
+import { env } from '../../env';
 
 const logger = new Logger('WechatApis');
 
@@ -9,8 +10,8 @@ export interface WechatCode2SessionResponse {
 }
 
 export class WechatApis {
-    private static appId: string = getOsEnv('APP_ID');
-    private static appSecret = getOsEnv('APP_SECRET');
+    private static appId: string = env.wechatMiniProgram.appid;
+    private static appSecret = env.wechatMiniProgram.secret;
 
     static async code2session(code: string): Promise<WechatCode2SessionResponse> {
         try {
