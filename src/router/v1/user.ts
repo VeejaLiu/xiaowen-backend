@@ -77,45 +77,45 @@ router.get('/info', async (req, res) => {
     });
 });
 
-/**
- * @api {post} /user/register 用户注册
- */
-router.post('/register', async (req, res) => {
-    logger.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
-    const { nickname, avatarUrl, openId, appId, unionId, sessionKey, accessKey } = req.body;
-
-    /*
-     * Create a new user
-     */
-    const newUser = await User.create({
-        nickname: nickname,
-        avatar_url: avatarUrl,
-        user_id: uuidv4(),
-        appid: appId,
-        openid: openId,
-        unionid: unionId,
-        session_key: sessionKey,
-        access_token: accessKey,
-    });
-
-    /*
-     * Init user quota
-     */
-    await UserQuotaHistory.create({
-        user_id: newUser.user_id,
-        quota_before: 0,
-        quota_after: 200,
-        change_amount: 200,
-        change_type: USER_QUOTA_HISTORY.CHANGE_TYPE.ADD,
-        change_reason: USER_QUOTA_HISTORY.CHANGE_REASON.ADD.REGISTER,
-    });
-    await UserQuota.create({
-        user_id: newUser.user_id,
-        quota: 200,
-    });
-
-    res.status(200).send();
-});
+// /**
+//  * @api {post} /user/register 用户注册
+//  */
+// router.post('/register', async (req, res) => {
+//     logger.info(`[API_LOGS][/register] ${JSON.stringify(req.body)}`);
+//     const { nickname, avatarUrl, openId, appId, unionId, sessionKey, accessKey } = req.body;
+//
+//     /*
+//      * Create a new user
+//      */
+//     const newUser = await User.create({
+//         nickname: nickname,
+//         avatar_url: avatarUrl,
+//         user_id: uuidv4(),
+//         appid: appId,
+//         openid: openId,
+//         unionid: unionId,
+//         session_key: sessionKey,
+//         access_token: accessKey,
+//     });
+//
+//     /*
+//      * Init user quota
+//      */
+//     await UserQuotaHistory.create({
+//         user_id: newUser.user_id,
+//         quota_before: 0,
+//         quota_after: 200,
+//         change_amount: 200,
+//         change_type: USER_QUOTA_HISTORY.CHANGE_TYPE.ADD,
+//         change_reason: USER_QUOTA_HISTORY.CHANGE_REASON.ADD.REGISTER,
+//     });
+//     await UserQuota.create({
+//         user_id: newUser.user_id,
+//         quota: 200,
+//     });
+//
+//     res.status(200).send();
+// });
 
 /**
  * @api {get} /user/history 获取用户生成历史
