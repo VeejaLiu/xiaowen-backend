@@ -1,5 +1,6 @@
 import Sequelize, { Model, ModelAttributes } from 'sequelize';
 import { sequelize, Defaultconfig } from '../db-config';
+import quota from '../../router/v1/quota';
 
 const UserQuotaHistorySchema: ModelAttributes = {
     id: {
@@ -57,18 +58,24 @@ class UserQuotaHistory extends Model {
         userId,
         changeType,
         changeReason,
+        quotaBefore,
         changeAmount,
+        quotaAfter,
     }: {
         userId: string;
         changeType: number;
         changeReason: number;
+        quotaBefore: number;
         changeAmount: number;
+        quotaAfter: number;
     }): Promise<UserQuotaHistory> {
         const userQuotaHistory = await UserQuotaHistory.create({
             user_id: userId,
             change_type: changeType,
             change_reason: changeReason,
+            quota_before: quotaBefore,
             change_amount: changeAmount,
+            quota_after: quotaAfter,
         });
         return userQuotaHistory;
     }
