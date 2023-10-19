@@ -3,19 +3,26 @@ import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { draw } from '../../clients/generate-server/generate';
 import { PromptHistory, UserGenerateHistory } from '../../models';
-import { USER_QUOTA_HISTORY } from '../../constant';
+import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
+import { verifyToken } from '../../lib/token/verifyToken';
+import { userQuotaHistoryService } from '../../general/user_quota_history';
 
 const router = express.Router();
+router.use(verifyToken);
+
 const log = new Logger(__filename);
 
 /**
- * Draw
+ * 绘制图片
+ *
+ * @route POST /draw
+ * @param {string} style - 绘制风格
+ * @param {string} prompt - 绘制内容
  */
-router.post('', async (req, res) => {
+router.post('', async (req: any, res) => {
     log.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
-    let { user_id, style, prompt } = req.body;
-
-    // TODO check this user's quota
+    const { userId } = req.user;
+    let { style, prompt } = req.body;
 
     /*
      * prompt process
@@ -28,6 +35,11 @@ router.post('', async (req, res) => {
     const transRes = await translate(prompt);
 
     /*
+     * consume quota
+     */
+    await userQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
+
+    /*
      * create prompt history record
      */
     const promptHistory = await PromptHistory.create({
@@ -35,10 +47,10 @@ router.post('', async (req, res) => {
         prompt_english: transRes,
     });
     const generateHistory = await UserGenerateHistory.create({
-        user_id: user_id,
+        user_id: userId,
         style: style,
         prompt_history_id: promptHistory.id,
-        status: USER_QUOTA_HISTORY.STATUS.ONGOING,
+        status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING,
         images: '',
     });
 
@@ -49,12 +61,10 @@ router.post('', async (req, res) => {
 
     // update generate history
     await generateHistory.update({
-        status: USER_QUOTA_HISTORY.STATUS.SUCCESS,
+        status: USER_QUOTA_HISTORY_CONSTANT.STATUS.SUCCESS,
         images: JSON.stringify(result.images),
         generate_used_time: result.used_time,
     });
-
-    // TODO consume user's quota
 
     res.send(result);
 });
