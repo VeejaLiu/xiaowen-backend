@@ -35,6 +35,7 @@ export async function draw(body: {
     });
     return await response.json();
 
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
     // return {
     //     images: [
     //         `tattoo/${new Date().valueOf()}_1.jpg`,
