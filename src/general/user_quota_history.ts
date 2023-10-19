@@ -45,7 +45,9 @@ export class userQuotaHistoryService {
                 userId: userId,
                 changeType: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.SUBTRACT,
                 changeReason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.SUBTRACT.GENERATE,
+                quotaBefore: userQuota.quota,
                 changeAmount: QUOTA_CONSTANT.GENERATE,
+                quotaAfter: userQuota.quota - QUOTA_CONSTANT.GENERATE,
             });
             // update user's quota
             await userQuota.update({
@@ -69,7 +71,9 @@ export class userQuotaHistoryService {
                 userId: userId,
                 changeType: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.ADD,
                 changeReason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.ADD.REFUND_BY_GENERATE_FAILED,
+                quotaBefore: userQuota.quota,
                 changeAmount: QUOTA_CONSTANT.GENERATE,
+                quotaAfter: userQuota.quota + QUOTA_CONSTANT.GENERATE,
             });
             // update user's quota
             await userQuota.update({
