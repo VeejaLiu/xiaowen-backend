@@ -1,4 +1,4 @@
-export const USER_QUOTA_HISTORY = {
+export const USER_QUOTA_HISTORY_CONSTANT = {
     STATUS: {
         ONGOING: 0, // 生成中
         SUCCESS: 1, // 生成成功
@@ -15,6 +15,7 @@ export const USER_QUOTA_HISTORY = {
             WATCH_AD: 1, // 观看广告
             RECHARGE: 2, // 购买
             INVITE_REGISTER: 3, // 邀请注册
+            REFUND_BY_GENERATE_FAILED: 4, // 生成失败退还
         },
         SUBTRACT: {
             GENERATE: 1, // 普通生成
