@@ -1,9 +1,7 @@
 import express from 'express';
 import { Logger } from '../../lib/logger';
-import { sequelize } from '../../models/db-config';
-import { User, UserQuota, UserQuotaHistory } from '../../models';
-import { v4 as uuidv4 } from 'uuid';
-import { USER_QUOTA_HISTORY } from '../../constant/user_quota_history';
+import { UserQuota, UserQuotaHistory } from '../../models';
+import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
 
 const router = express.Router();
 
@@ -64,8 +62,8 @@ router.post('/recharge', async (req, res) => {
         quota_before: userQuota.quota,
         quota_after: newQuota,
         change_amount: amount,
-        change_type: USER_QUOTA_HISTORY.CHANGE_TYPE.ADD,
-        change_reason: USER_QUOTA_HISTORY.CHANGE_REASON.ADD.RECHARGE,
+        change_type: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.ADD,
+        change_reason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.ADD.RECHARGE,
     });
     await userQuota.update({ quota: newQuota });
 
