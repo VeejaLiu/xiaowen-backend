@@ -5,6 +5,32 @@ import { Logger } from '../lib/logger';
 const logger = new Logger(__filename);
 export class userQuotaHistoryService {
     /**
+     * 新用户注册，初始化配额
+     */
+    static async initQuota({ userId }: { userId: string }) {
+        try {
+            /*
+             * Init user quota
+             */
+            await UserQuotaHistory.create({
+                user_id: userId,
+                quota_before: 0,
+                quota_after: QUOTA_CONSTANT.INIT,
+                change_amount: QUOTA_CONSTANT.INIT,
+                change_type: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.ADD,
+                change_reason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.ADD.REGISTER,
+            });
+            await UserQuota.create({
+                user_id: userId,
+                quota: QUOTA_CONSTANT.INIT,
+            });
+        } catch (e) {
+            logger.error(`[userQuotaHistoryService][initQuota] ${e.message}`);
+            throw e;
+        }
+    }
+
+    /**
      * 生成消费，减少配额
      */
     static async consumeQuotaForGenerate({ userId }: { userId: string }) {
