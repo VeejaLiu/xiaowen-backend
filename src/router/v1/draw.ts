@@ -1,7 +1,6 @@
 import express from 'express';
 import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
-import { draw } from '../../clients/generate-server/generate';
 import { PromptHistory, UserGenerateHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
 import { verifyToken } from '../../lib/token/verifyToken';
@@ -54,19 +53,9 @@ router.post('', async (req: any, res) => {
         images: '',
     });
 
-    /*
-     * draw
-     */
-    const result = await draw({ style: style, prompt: transRes });
-
-    // update generate history
-    await generateHistory.update({
-        status: USER_QUOTA_HISTORY_CONSTANT.STATUS.SUCCESS,
-        images: JSON.stringify(result.images),
-        generate_used_time: result.used_time,
+    res.send({
+        generateHistoryId: generateHistory.id,
     });
-
-    res.send(result);
 });
 
 export default router;
