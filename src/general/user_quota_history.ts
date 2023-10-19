@@ -31,4 +31,28 @@ export class userQuotaHistoryService {
             throw e;
         }
     }
+
+    /**
+     * 生成失败，退回配额
+     */
+    static async refundQuotaForGenerate({ userId }: { userId: string }) {
+        try {
+            const userQuota = await UserQuota.getByUserId(userId);
+            // refund user's quota
+            await UserQuotaHistory.addHistory({
+                userId: userId,
+                changeType: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.ADD,
+                changeReason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.ADD.REFUND_BY_GENERATE_FAILED,
+                changeAmount: QUOTA_CONSTANT.GENERATE,
+            });
+            // update user's quota
+            await userQuota.update({
+                quota: userQuota.quota + QUOTA_CONSTANT.GENERATE,
+            });
+            return true;
+        } catch (e) {
+            logger.error(`[userQuotaHistoryService][refundQuotaForGenerate] ${e.message}`);
+            throw e;
+        }
+    }
 }
