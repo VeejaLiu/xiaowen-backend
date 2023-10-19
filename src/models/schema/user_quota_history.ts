@@ -49,6 +49,29 @@ class UserQuotaHistory extends Model {
     public change_reason!: string;
     public create_time!: Date;
     public update_time!: Date;
+
+    /**
+     * 添加配额变更历史
+     */
+    public static async addHistory({
+        userId,
+        changeType,
+        changeReason,
+        changeAmount,
+    }: {
+        userId: string;
+        changeType: number;
+        changeReason: number;
+        changeAmount: number;
+    }): Promise<UserQuotaHistory> {
+        const userQuotaHistory = await UserQuotaHistory.create({
+            user_id: userId,
+            change_type: changeType,
+            change_reason: changeReason,
+            change_amount: changeAmount,
+        });
+        return userQuotaHistory;
+    }
 }
 
 UserQuotaHistory.init(UserQuotaHistorySchema, {
