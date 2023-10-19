@@ -1,5 +1,8 @@
 import Sequelize, { Model, ModelAttributes } from 'sequelize';
 import { sequelize, Defaultconfig } from '../db-config';
+import { Logger } from '../../lib/logger';
+
+const logger = new Logger(__filename);
 
 const UserQuotaSchema: ModelAttributes = {
     id: {
@@ -31,6 +34,36 @@ class UserQuota extends Model {
     public quota!: number;
     public create_time!: Date;
     public update_time!: Date;
+
+    /**
+     * 获取记录by user_id
+     */
+    public static async getByUserId(userId: string): Promise<UserQuota> {
+        try {
+            const sqlRes = await UserQuota.findOne({
+                where: { user_id: userId },
+            });
+            return sqlRes;
+        } catch (e) {
+            logger.error(`[UserQuota][getByUserId] ${e}`);
+            return null;
+        }
+    }
+
+    /**
+     * 获取用户剩余配额
+     */
+    public static async getQuota(userId: string): Promise<number> {
+        try {
+            const sqlRes = await UserQuota.findOne({
+                where: { user_id: userId },
+            });
+            return sqlRes.quota;
+        } catch (e) {
+            logger.error(`[UserQuota][getQuota] ${e}`);
+            return 0;
+        }
+    }
 }
 
 UserQuota.init(UserQuotaSchema, {
