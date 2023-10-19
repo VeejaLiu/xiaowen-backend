@@ -21,7 +21,7 @@ router.post('', async (req, res) => {
     logger.info(`[API_LOGS][/login] ${JSON.stringify(wxRes)}`);
 
     //查询数据库中是否有该用户
-    const user = await User.findOne({ where: { openid: openid } });
+    let user = await User.findOne({ where: { openid: openid } });
 
     const result: {
         nickname?: string;
@@ -38,7 +38,7 @@ router.post('', async (req, res) => {
     } else {
         logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
         //如果没有该用户，创建一个新用户
-        const newUser = await User.create({
+        user = await User.create({
             nickname: 'wx_' + uuidv4().substring(0, 8),
             avatar_url: '',
             user_id: uuidv4(),
@@ -48,12 +48,12 @@ router.post('', async (req, res) => {
             session_key: session_key,
             access_token: '',
         });
-        logger.info(`[API_LOGS][/login] New user created, user_id: ${newUser.user_id}, openid: ${openid}`);
-        await userQuotaHistoryService.initQuota({ userId: newUser.user_id });
+        logger.info(`[API_LOGS][/login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
+        await userQuotaHistoryService.initQuota({ userId: user.user_id });
 
-        result.nickname = newUser.nickname;
+        result.nickname = user.nickname;
         result.token = 'xxx';
-        result.createTime = newUser.create_time.toUTCString();
+        result.createTime = user.create_time.toUTCString();
     }
 
     // 签发JWT token
