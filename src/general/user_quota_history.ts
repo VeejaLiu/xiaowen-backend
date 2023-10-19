@@ -22,7 +22,7 @@ export class userQuotaHistoryService {
                 changeAmount: QUOTA_CONSTANT.GENERATE,
             });
             // update user's quota
-            const updateRes = await userQuota.update({
+            await userQuota.update({
                 quota: userQuota.quota - QUOTA_CONSTANT.GENERATE,
             });
             return true;
