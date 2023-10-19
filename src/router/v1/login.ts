@@ -5,6 +5,7 @@ import { signToken } from '../../lib/token/signToken';
 import { WechatApis } from '../../clients/wechat/WechatApis';
 import { Logger } from '../../lib/logger';
 import { env } from '../../env';
+import { userQuotaHistoryService } from '../../general/user_quota_history';
 
 const router = express.Router();
 const logger = new Logger(__filename);
@@ -48,6 +49,8 @@ router.post('', async (req, res) => {
             access_token: '',
         });
         logger.info(`[API_LOGS][/login] New user created, user_id: ${newUser.user_id}, openid: ${openid}`);
+        await userQuotaHistoryService.initQuota({ userId: newUser.user_id });
+
         result.nickname = newUser.nickname;
         result.token = 'xxx';
         result.createTime = newUser.create_time.toUTCString();
