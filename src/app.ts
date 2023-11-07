@@ -24,6 +24,11 @@ loadMonitor(app);
 loadWinston();
 const log = new Logger(__filename);
 
+app.use(function (err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 app.listen(env.app.port, () => {
     banner(log);
 });
