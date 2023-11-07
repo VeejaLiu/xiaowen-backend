@@ -31,6 +31,9 @@ app.listen(env.app.port, () => {
 /*
  * 启动executeTaskFromQueue()，每2秒执行一次
  */
-setInterval(async () => {
+async function runTask() {
     await executeTaskFromQueue();
-}, 2000);
+    setTimeout(runTask, 2000);
+}
+
+runTask();
