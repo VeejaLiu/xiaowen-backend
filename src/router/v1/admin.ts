@@ -3,6 +3,7 @@ import { Logger } from '../../lib/logger';
 import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { PromptHistory, UserGenerateHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
+import { sequelize } from '../../models/db-config';
 
 const router = express.Router();
 
@@ -56,17 +57,42 @@ router.get('/history', async (req: any, res) => {
     let { page, pageSize } = req.query;
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 10;
-    const history = await UserGenerateHistory.findAndCountAll({
-        where: {
-            user_id: 'admin',
-        },
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-        order: [['create_time', 'DESC']],
-    });
+    const sqlRes = await sequelize.query(`
+        select ugh.id                 as id,
+               ugh.user_id            as user_id,
+               ugh.style              as style,
+               ph.prompt              as prompt,
+               ph.prompt_english      as prompt_english,
+               ugh.generate_used_time as generate_used_time,
+               ugh.status             as status,
+               ugh.images             as images,
+               ugh.create_time        as create_time
+        from user_generate_history as ugh
+                 left join prompt_history as ph
+                           on ugh.prompt_history_id = ph.id
+        WHERE ugh.user_id = 'admin'
+        ORDER BY ugh.id DESC`);
+    const countSqlRes = await sequelize.query(`
+        select count(ugh.id) as count
+        from user_generate_history as ugh
+                 left join prompt_history as ph
+                           on ugh.prompt_history_id = ph.id
+        WHERE ugh.user_id = 'admin'`);
+    const history = sqlRes[0].map((item: any) => ({
+        id: item.id,
+        userId: item.user_id,
+        style: item.style,
+        prompt: item.prompt,
+        promptEnglish: item.prompt_english,
+        generateUsedTime: item.generate_used_time,
+        status: item.status,
+        images: JSON.parse(item?.images?.length > 0 ? item.images : '[]'),
+        createTime: item.create_time,
+    }));
+
     res.send({
-        history: history.rows,
-        total: history.count,
+        history: history,
+        total: (countSqlRes[0][0] as any).count,
     });
 });
 export default router;
