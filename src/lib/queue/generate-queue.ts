@@ -43,12 +43,14 @@ export async function executeTaskFromQueue() {
      */
     try {
         logger.info(`[generate-queue][executeTaskFromQueue] start draw`);
+        const startTime = new Date().getTime();
         const result = await draw({ style: generateHistory.style, prompt: promptEnglish });
+        const endTime = new Date().getTime();
         // update generate history
         await generateHistory.update({
             status: USER_QUOTA_HISTORY_CONSTANT.STATUS.SUCCESS,
-            images: JSON.stringify(result.images),
-            generate_used_time: result.used_time,
+            images: JSON.stringify(result),
+            generate_used_time: endTime - startTime,
         });
     } catch (e) {
         logger.error(`[generate-queue][executeTaskFromQueue] draw error: ${e}`);
