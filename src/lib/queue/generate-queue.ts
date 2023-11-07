@@ -53,6 +53,9 @@ export async function executeTaskFromQueue() {
             generate_used_time: endTime - startTime,
         });
     } catch (e) {
+        if (generateHistory.user_id === 'admin') {
+            return;
+        }
         logger.error(`[generate-queue][executeTaskFromQueue] draw error: ${e}`);
         await generateHistory.update({
             status: USER_QUOTA_HISTORY_CONSTANT.STATUS.FAILED,
