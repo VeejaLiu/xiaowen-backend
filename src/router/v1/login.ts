@@ -6,10 +6,12 @@ import { WechatApis } from '../../clients/wechat/WechatApis';
 import { Logger } from '../../lib/logger';
 import { env } from '../../env';
 import { userQuotaHistoryService } from '../../general/user_quota_history';
+import { verifyToken } from '../../lib/token/verifyToken';
 
 const router = express.Router();
 const logger = new Logger(__filename);
 const appId = env.wechatMiniProgram.appid;
+const WxBizDataCrypt = require('../../clients/wechat/WXBizDataCrypt');
 
 /**
  * @api {get} /login 用户登录
@@ -61,6 +63,21 @@ router.post('', async (req, res) => {
     result.token = token;
 
     res.status(200).send(result);
+});
+
+router.use(verifyToken).post('/getPhoneNumber', async (req: any, res) => {
+    const userId = req.user.user_id;
+    const { encryptedData, iv, code } = req.body;
+
+    // get session_key
+    const user = await User.findOne({ where: { user_id: userId } });
+    const sessionKey = user.session_key;
+
+    const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
+    const data = wxBizDataCrypt.decryptData(encryptedData, iv);
+    logger.info(`[API_LOGS][/getPhoneNumber] ${JSON.stringify(data)}`);
+
+    res.status(200).send();
 });
 
 export default router;
