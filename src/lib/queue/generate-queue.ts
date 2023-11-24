@@ -19,6 +19,7 @@ export async function executeTaskFromQueue() {
         order: [['id', 'ASC']],
     });
     if (!generateHistory) {
+        // logger.info(`[generate-queue][executeTaskFromQueue] No task in queue`);
         return;
     }
     logger.info(
