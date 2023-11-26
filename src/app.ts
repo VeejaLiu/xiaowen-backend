@@ -25,7 +25,7 @@ loadWinston();
 const log = new Logger(__filename);
 
 app.use(function (err, req, res, next) {
-    console.error(err.stack);
+    console.error(`[APP][Error] ${err.stack}`);
     res.status(500).send('Something broke!');
 });
 

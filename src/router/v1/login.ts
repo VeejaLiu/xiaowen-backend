@@ -29,14 +29,23 @@ router.post('', async (req, res) => {
         nickname?: string;
         token?: string;
         createTime?: string;
+        sessionKey?: string;
     } = {};
 
     if (user) {
         logger.info(`[API_LOGS][/login] Login success, user_id: ${user.user_id}, openid: ${openid}`);
+
+        if (session_key !== user.session_key) {
+            logger.info(`[API_LOGS][/login] session_key changed, user_id: ${user.user_id}, openid: ${openid}`);
+            user.session_key = session_key;
+            await user.save();
+        }
+
         //如果有该用户
         result.nickname = user.nickname;
         result.token = 'xxx';
         result.createTime = user.create_time.toUTCString();
+        result.sessionKey = user.session_key;
     } else {
         logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
         //如果没有该用户，创建一个新用户
@@ -56,6 +65,7 @@ router.post('', async (req, res) => {
         result.nickname = user.nickname;
         result.token = 'xxx';
         result.createTime = user.create_time.toUTCString();
+        result.sessionKey = user.session_key;
     }
 
     // 签发JWT token
@@ -66,7 +76,7 @@ router.post('', async (req, res) => {
 });
 
 router.use(verifyToken).post('/getPhoneNumber', async (req: any, res) => {
-    const userId = req.user.user_id;
+    const userId = req.user.userId;
     const { encryptedData, iv, code } = req.body;
 
     // get session_key
