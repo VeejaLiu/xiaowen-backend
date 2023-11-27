@@ -73,8 +73,35 @@ class User extends Model {
     public unionid!: string;
     public session_key!: string;
     public access_token!: string;
+    public phone_code!: string;
+    public phone_number!: string;
     public create_time!: Date;
     public update_time!: Date;
+
+    /**
+     * 更改手机信息
+     */
+    public static async updatePhoneInfo({
+        userId,
+        phoneCode,
+        phoneNumber,
+    }: {
+        userId: string;
+        phoneCode: string;
+        phoneNumber: string;
+    }) {
+        return await User.update(
+            {
+                phone_code: phoneCode,
+                phone_number: phoneNumber,
+            },
+            {
+                where: {
+                    user_id: userId,
+                },
+            },
+        );
+    }
 }
 
 User.init(UserSchema, {

@@ -77,17 +77,23 @@ router.post('', async (req, res) => {
 
 router.use(verifyToken).post('/getPhoneNumber', async (req: any, res) => {
     const userId = req.user.userId;
+    const sessionKey = req.headers.session_key;
     const { encryptedData, iv, code } = req.body;
-
-    // get session_key
-    const user = await User.findOne({ where: { user_id: userId } });
-    const sessionKey = user.session_key;
+    logger.info(`[API_LOGS][/getPhoneNumber] userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
     const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
     const data = wxBizDataCrypt.decryptData(encryptedData, iv);
     logger.info(`[API_LOGS][/getPhoneNumber] ${JSON.stringify(data)}`);
 
-    res.status(200).send();
+    const { phoneNumber, countryCode } = data;
+
+    await User.updatePhoneInfo({
+        userId: userId,
+        phoneCode: countryCode,
+        phoneNumber: phoneNumber,
+    });
+
+    res.status(200).send(true);
 });
 
 export default router;
