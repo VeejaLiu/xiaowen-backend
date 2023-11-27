@@ -16,6 +16,8 @@ create table user
     unionid      varchar(255) default ''                not null comment '小程序unionid',
     session_key  varchar(255) default ''                not null comment '小程序session_key',
     access_token varchar(255) default ''                not null comment '小程序access_token',
+    phone_code   varchar(20)                            null comment '手机区号',
+    phone_number varchar(20)                            null comment '手机号码',
     create_time  datetime     default CURRENT_TIMESTAMP not null,
     update_time  datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
 )

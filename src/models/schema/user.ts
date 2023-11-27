@@ -12,6 +12,8 @@ CREATE TABLE `user` (
   `unionid` varchar(255) NOT NULL DEFAULT '',
   `session_key` varchar(255) NOT NULL DEFAULT '',
   `access_token` varchar(255) NOT NULL DEFAULT '',
+  `phone_code` varchar(20) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -46,6 +48,12 @@ const UserSchema: ModelAttributes = {
     },
     access_token: {
         type: Sequelize.STRING(255),
+    },
+    phone_code: {
+        type: Sequelize.STRING(20),
+    },
+    phone_number: {
+        type: Sequelize.STRING(20),
     },
     create_time: {
         type: Sequelize.DATE,
