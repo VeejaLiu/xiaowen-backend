@@ -53,7 +53,7 @@ router.get('', async (req: any, res) => {
             prompt: item.prompt,
             generateUsedTime: item.generate_used_time,
             status: item.status,
-            images: JSON.parse(item.images),
+            images: JSON.parse(item.images || '[]'),
             createTime: item.create_time,
         })),
         total: (countSqlRes[0][0] as any).count,
