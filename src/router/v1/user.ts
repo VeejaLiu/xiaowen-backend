@@ -14,7 +14,7 @@ router.use(verifyToken);
  */
 router.get('/info', async (req: any, res) => {
     logger.info(`[API_LOGS][/info] ${JSON.stringify(req.body)}`);
-    const { userId } = req.user.user_id;
+    const { userId } = req.user;
     logger.info(`[API_LOGS][/info] userId: ${userId}`);
 
     const user = await User.findOne({ where: { user_id: userId } });
