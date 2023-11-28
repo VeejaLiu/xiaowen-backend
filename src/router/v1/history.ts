@@ -84,6 +84,13 @@ router.get('/:generate_history_id', async (req: any, res) => {
           AND ugh.id = ${generate_history_id}`);
     const item: any = sqlRes[0][0];
 
+    if (!item) {
+        res.status(404).send({
+            message: 'Not Found',
+        });
+        return;
+    }
+
     res.status(200).send({
         id: item.id,
         userId: item.user_id,
