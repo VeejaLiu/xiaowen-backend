@@ -1,13 +1,35 @@
-import { PromptHistory, UserGenerateHistory } from '../../models';
+import { PromptHistory, User, UserGenerateHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
 import { draw } from '../../clients/generate-server/generate';
 import { Logger } from '../logger';
 import { userQuotaHistoryService } from '../../general/user_quota_history';
+import { WechatApis } from '../../clients/wechat/WechatApis';
+import { TATTOO_STYLES } from '../../constant/style';
 
 const logger = new Logger(__filename);
 
 export function addTaskIntoQueue(generateHistoryId: number) {
     // TODO
+}
+
+async function sendNotification({
+    userGenerateHistory,
+    promptHistory,
+    success,
+}: {
+    userGenerateHistory: UserGenerateHistory;
+    promptHistory: PromptHistory;
+    success: boolean;
+}) {
+    if (userGenerateHistory.notification !== 1) {
+        logger.info(`[generate-queue][sendNotification][${userGenerateHistory.id}] notification is not enabled`);
+    }
+    const openId = await User.getOpenId({ userId: userGenerateHistory.user_id });
+    await WechatApis.sendTemplateMessage({
+        touser: openId,
+        style: TATTOO_STYLES.find((style) => style.index === userGenerateHistory.style)?.name || '',
+        prompt: promptHistory.prompt,
+    });
 }
 
 export async function executeTaskFromQueue() {
@@ -53,6 +75,9 @@ export async function executeTaskFromQueue() {
             images: JSON.stringify(result),
             generate_used_time: endTime - startTime,
         });
+        logger.info(`[generate-queue][executeTaskFromQueue] Update prompt history status to success`);
+
+        await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
     } catch (e) {
         if (generateHistory.user_id === 'admin') {
             return;
