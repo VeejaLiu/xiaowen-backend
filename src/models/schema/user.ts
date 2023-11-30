@@ -102,6 +102,18 @@ class User extends Model {
             },
         );
     }
+
+    /**
+     * 获取open id
+     */
+    public static async getOpenId({ userId }: { userId: string }) {
+        const user = await User.findOne({
+            where: {
+                user_id: userId,
+            },
+        });
+        return user.openid;
+    }
 }
 
 User.init(UserSchema, {
