@@ -79,6 +79,13 @@ class User extends Model {
     public update_time!: Date;
 
     /**
+     * 获取用户信息, 通过user_id
+     */
+    public static async getByUserId(userId: string) {
+        return await User.findOne({ where: { user_id: userId } });
+    }
+
+    /**
      * 更改手机信息
      */
     public static async updatePhoneInfo({

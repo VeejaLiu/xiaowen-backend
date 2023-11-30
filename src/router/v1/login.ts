@@ -17,7 +17,7 @@ const WxBizDataCrypt = require('../../clients/wechat/WXBizDataCrypt');
  * @api {get} /login 用户登录
  */
 router.post('', async (req, res) => {
-    const { code } = req.body;
+    const { code, inviteCode } = req.body;
     const wxRes = await WechatApis.code2session(code);
     const { openid, session_key } = wxRes;
     logger.info(`[API_LOGS][/login] ${JSON.stringify(wxRes)}`);
@@ -26,9 +26,8 @@ router.post('', async (req, res) => {
     let user = await User.findOne({ where: { openid: openid } });
 
     const result: {
+        userId?: string;
         nickname?: string;
-        token?: string;
-        createTime?: string;
         sessionKey?: string;
     } = {};
 
@@ -49,9 +48,8 @@ router.post('', async (req, res) => {
         }
 
         //如果有该用户
+        result.userId = user.user_id;
         result.nickname = user.nickname;
-        result.token = 'xxx';
-        result.createTime = user.create_time.toUTCString();
         result.sessionKey = user.session_key;
     } else {
         logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
@@ -69,23 +67,17 @@ router.post('', async (req, res) => {
         logger.info(`[API_LOGS][/login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
         await userQuotaHistoryService.initQuota({ userId: user.user_id });
 
+        result.userId = user.user_id;
         result.nickname = user.nickname;
-        result.token = 'xxx';
-        result.createTime = user.create_time.toUTCString();
         result.sessionKey = user.session_key;
     }
-
-    // 签发JWT token
-    const token = signToken(user);
-    result.token = token;
 
     res.status(200).send(result);
 });
 
-router.use(verifyToken).post('/getPhoneNumber', async (req: any, res) => {
-    const userId = req.user.userId;
+router.post('/getPhoneNumber', async (req: any, res) => {
     const sessionKey = req.headers.session_key;
-    const { encryptedData, iv, code } = req.body;
+    const { user_id: userId, encryptedData, iv, code } = req.body;
     logger.info(`[API_LOGS][/getPhoneNumber] userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
     const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
@@ -93,14 +85,19 @@ router.use(verifyToken).post('/getPhoneNumber', async (req: any, res) => {
     logger.info(`[API_LOGS][/getPhoneNumber] ${JSON.stringify(data)}`);
 
     const { phoneNumber, countryCode } = data;
-
     await User.updatePhoneInfo({
         userId: userId,
         phoneCode: countryCode,
         phoneNumber: phoneNumber,
     });
 
-    res.status(200).send(true);
+    const user = await User.getByUserId(userId);
+    const token = signToken(user);
+
+    res.status(200).send({
+        success: true,
+        data: { ...user, token: token },
+    });
 });
 
 export default router;
