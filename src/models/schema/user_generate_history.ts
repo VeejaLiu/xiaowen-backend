@@ -8,6 +8,7 @@ CREATE TABLE `user_generate_history` (
   `style` int NOT NULL DEFAULT '0' COMMENT '风格',
   `prompt_history_id` bigint NOT NULL COMMENT 'prompt_history表的id',
   `status` int DEFAULT '0' COMMENT '生成状态',
+  `notification` int NOT NULL DEFAULT '0',
   `generate_used_time` int NOT NULL DEFAULT '0' COMMENT '生成所用时间,单位毫秒',
   `images` text NOT NULL COMMENT '生成的图片objectName, 是个string数组Json',
   `is_private` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否私有',
@@ -37,6 +38,11 @@ const UserGenerateHistorySchema: ModelAttributes = {
         allowNull: false,
     },
     status: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+    },
+    notification: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
@@ -81,6 +87,7 @@ class UserGenerateHistory extends Model {
     public style!: number;
     public prompt_history_id!: bigint;
     public status!: number;
+    public notification!: number;
     public generate_used_time!: number;
     public images!: string;
     public is_private!: boolean;

@@ -33,6 +33,7 @@ CREATE TABLE `user_generate_history`
     `prompt_history_id`  BIGINT     NOT NULL COMMENT 'prompt_history表的id',
     `generate_used_time` INT        NOT NULL DEFAULT 0 COMMENT '生成所用时间,单位毫秒',
     `status`             INT        NULL     DEFAULT 0 COMMENT '生成状态',
+    `notification`       INT                 DEFAULT 0 NOT NULL,
     `images`             TEXT       NOT NULL COMMENT '生成的图片objectName, 是个string数组Json',
     `is_private`         tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否私有',
     `is_starred`         tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否收藏',
