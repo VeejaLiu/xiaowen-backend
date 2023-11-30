@@ -82,7 +82,7 @@ class User extends Model {
      * 获取用户信息, 通过user_id
      */
     public static async getByUserId(userId: string) {
-        return await User.findOne({ where: { user_id: userId } });
+        return await User.findOne({ where: { user_id: userId }, raw: true });
     }
 
     /**
