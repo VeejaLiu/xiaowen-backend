@@ -7,13 +7,14 @@ CREATE TABLE `user` (
   `user_id` varchar(36) DEFAULT NULL,
   `nickname` varchar(255) DEFAULT NULL COMMENT '用户昵称',
   `avatar_url` varchar(500) DEFAULT NULL COMMENT '用户头像地址',
-  `appid` varchar(255) NOT NULL DEFAULT '',
-  `openid` varchar(255) NOT NULL DEFAULT '',
-  `unionid` varchar(255) NOT NULL DEFAULT '',
-  `session_key` varchar(255) NOT NULL DEFAULT '',
-  `access_token` varchar(255) NOT NULL DEFAULT '',
-  `phone_code` varchar(20) DEFAULT NULL,
-  `phone_number` varchar(20) DEFAULT NULL,
+  `appid` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序appid',
+  `openid` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序openid',
+  `unionid` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序unionid',
+  `session_key` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序session_key',
+  `access_token` varchar(255) NOT NULL DEFAULT '' COMMENT '小程序access_token',
+  `phone_code` varchar(20) DEFAULT NULL COMMENT '手机区号',
+  `phone_number` varchar(20) DEFAULT NULL COMMENT '手机号码',
+  `invite_user_id` varchar(36) DEFAULT NULL COMMENT '邀请用户',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -55,6 +56,9 @@ const UserSchema: ModelAttributes = {
     phone_number: {
         type: Sequelize.STRING(20),
     },
+    invite_user_id: {
+        type: Sequelize.STRING(36),
+    },
     create_time: {
         type: Sequelize.DATE,
     },
@@ -75,6 +79,7 @@ class User extends Model {
     public access_token!: string;
     public phone_code!: string;
     public phone_number!: string;
+    public invite_user_id!: string;
     public create_time!: Date;
     public update_time!: Date;
 
