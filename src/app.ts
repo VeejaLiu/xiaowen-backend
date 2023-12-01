@@ -24,6 +24,11 @@ loadMonitor(app);
 loadWinston();
 const log = new Logger(__filename);
 
+app.use(function (err, req, res, next) {
+    console.error(`[APP][Error] ${err.stack}`);
+    res.status(500).send('Something broke!');
+});
+
 app.listen(env.app.port, () => {
     banner(log);
 });
@@ -31,6 +36,9 @@ app.listen(env.app.port, () => {
 /*
  * 启动executeTaskFromQueue()，每2秒执行一次
  */
-setInterval(async () => {
+async function runTask() {
     await executeTaskFromQueue();
-}, 2000);
+    setTimeout(runTask, 2000);
+}
+
+runTask();

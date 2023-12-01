@@ -85,4 +85,31 @@ export class userQuotaHistoryService {
             throw e;
         }
     }
+
+    static async addQuotaForInvite({ userId }: { userId: any }) {
+        const logPre = `[userQuotaHistoryService][addQuotaForInvite][${userId}]`;
+        try {
+            const userQuota = await UserQuota.getByUserId(userId);
+            logger.info(`${logPre} current quota: ${userQuota.quota}`);
+            // refund user's quota
+            const quotaHistory = await UserQuotaHistory.addHistory({
+                userId: userId,
+                changeType: USER_QUOTA_HISTORY_CONSTANT.CHANGE_TYPE.ADD,
+                changeReason: USER_QUOTA_HISTORY_CONSTANT.CHANGE_REASON.ADD.INVITE_REGISTER,
+                quotaBefore: userQuota.quota,
+                changeAmount: QUOTA_CONSTANT.INVITE_REGISTER,
+                quotaAfter: userQuota.quota + QUOTA_CONSTANT.INVITE_REGISTER,
+            });
+            logger.info(`${logPre} add quota history, id: ${quotaHistory.id}`);
+            // update user's quota
+            await userQuota.update({
+                quota: userQuota.quota + QUOTA_CONSTANT.INVITE_REGISTER,
+            });
+            logger.info(`${logPre} update quota, quota: ${userQuota.quota}`);
+            return true;
+        } catch (e) {
+            logger.error(`[userQuotaHistoryService][addQuotaForInvite] ${e.message}`);
+            throw e;
+        }
+    }
 }

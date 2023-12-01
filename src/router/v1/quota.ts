@@ -2,10 +2,13 @@ import express from 'express';
 import { Logger } from '../../lib/logger';
 import { UserQuota, UserQuotaHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
+import { verifyToken } from '../../lib/token/verifyToken';
 
 const router = express.Router();
 
-const log = new Logger(__filename);
+const logger = new Logger(__filename);
+
+router.use(verifyToken);
 
 /**
  * @api {post} /quota 获取用户剩余配额
@@ -27,8 +30,11 @@ router.get('', async (req, res) => {
 /**
  * @api {get} /quota/history 获取用户配额变更历史
  */
-router.get('/history', async (req, res) => {
-    const { userId, start, limit } = req.query;
+router.get('/history', async (req: any, res) => {
+    const userId = req.user.userId;
+    const { start, limit } = req.query;
+
+    logger.info(`[API_LOGS][/quota/history] userId: ${userId}`);
 
     const sqlRes = await UserQuotaHistory.findAll({
         where: {
@@ -37,9 +43,19 @@ router.get('/history', async (req, res) => {
         order: [['id', 'DESC']],
         offset: Number(start) || 0,
         limit: Number(limit) || 20,
+        raw: true,
     });
 
-    res.send(sqlRes);
+    res.send(
+        sqlRes.map((item) => {
+            return {
+                id: item.id,
+                changeType: +item.change_type,
+                amount: item.change_amount,
+                reason: +item.change_reason,
+            };
+        }),
+    );
 });
 
 /**
