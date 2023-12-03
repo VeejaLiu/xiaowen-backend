@@ -23,6 +23,7 @@ async function sendNotification({
 }) {
     if (userGenerateHistory.notification !== 1) {
         logger.info(`[generate-queue][sendNotification][${userGenerateHistory.id}] notification is not enabled`);
+        return;
     }
     const openId = await User.getOpenId({ userId: userGenerateHistory.user_id });
     await WechatApis.sendTemplateMessage({
