@@ -91,6 +91,7 @@ export async function executeTaskFromQueue() {
 
         await userQuotaHistoryService.refundQuotaForGenerate({ userId: generateHistory.user_id });
         logger.info(`[generate-queue][executeTaskFromQueue] Refund quota`);
-        await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
+        // 发送失败通知
+        // await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
     }
 }
