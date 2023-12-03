@@ -90,15 +90,15 @@ router.post('', async (req, res) => {
     res.status(200).send(result);
 });
 
-async function generateInviteInfo({ loginUserId, inviteCode }: { loginUserId: string; inviteCode: string }) {
+async function generateInviteInfo({ loginUserId, inviteBy }: { loginUserId: string; inviteBy: string }) {
     const logPre = '[login][generateInviteInfo]';
 
-    if (!inviteCode) {
-        logger.info(`${logPre} No invite code [end]`);
+    if (!inviteBy) {
+        logger.info(`${logPre} No invite by [end]`);
         return;
     }
 
-    logger.info(`${logPre} Invite code: ${inviteCode}, login user id: ${loginUserId}`);
+    logger.info(`${logPre} Invite by: ${inviteBy}, login user id: ${loginUserId}`);
 
     const user = await User.findOne({ where: { user_id: loginUserId } });
     if (user.invited_by_user_id) {
@@ -106,9 +106,9 @@ async function generateInviteInfo({ loginUserId, inviteCode }: { loginUserId: st
         return;
     }
 
-    const invitedByUser = await User.getByInviteCode(inviteCode);
+    const invitedByUser = await User.getByInviteCode(inviteBy);
     if (!invitedByUser) {
-        logger.error(`${logPre} invalid invite user not found, inviteCode: ${inviteCode} [end]`);
+        logger.error(`${logPre} invalid invite user not found, inviteBy: ${inviteBy} [end]`);
         return;
     }
 
@@ -136,7 +136,7 @@ async function generateInviteInfo({ loginUserId, inviteCode }: { loginUserId: st
 router.post('/getPhoneNumber', async (req: any, res) => {
     const logPre = '[API_LOGS][/login/getPhoneNumber]';
     const sessionKey = req.headers.session_key;
-    const { user_id: userId, inviteCode, encryptedData, iv, code } = req.body;
+    const { user_id: userId, inviteBy, encryptedData, iv, code } = req.body;
     logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
     const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
@@ -158,7 +158,7 @@ router.post('/getPhoneNumber', async (req: any, res) => {
         phoneNumber: phoneNumber,
     });
 
-    await generateInviteInfo({ loginUserId: userId, inviteCode: inviteCode });
+    await generateInviteInfo({ loginUserId: userId, inviteBy: inviteBy });
 
     const token = signToken(user);
 
