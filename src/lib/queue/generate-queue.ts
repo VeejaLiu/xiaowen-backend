@@ -69,6 +69,7 @@ export async function executeTaskFromQueue() {
         logger.info(`[generate-queue][executeTaskFromQueue] start draw`);
         const startTime = new Date().getTime();
         const result = await draw({ style: generateHistory.style, prompt: promptEnglish });
+        logger.info(`[generate-queue][executeTaskFromQueue] draw result: ${JSON.stringify(result)}`);
         const endTime = new Date().getTime();
         // update generate history
         await generateHistory.update({

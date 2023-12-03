@@ -19,43 +19,50 @@ const log = new Logger(__filename);
  * @param {string} prompt - 绘制内容
  */
 router.post('', async (req: any, res) => {
-    log.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
-    const { userId } = req.user;
-    let { style, prompt } = req.body;
+    try {
+        log.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
+        const { userId } = req.user;
+        let { style, prompt } = req.body;
 
-    /*
-     * prompt process
-     */
-    prompt = prompt.trim();
-    if (!prompt || prompt.length === 0) {
-        log.error(`[API_LOGS][/draw] prompt is empty`);
-        return res.status(400).send('prompt is empty');
+        /*
+         * prompt process
+         */
+        prompt = prompt.trim();
+        if (!prompt || prompt.length === 0) {
+            log.error(`[API_LOGS][/draw] prompt is empty`);
+            return res.status(400).send('prompt is empty');
+        }
+        const transRes = await translate(prompt);
+
+        /*
+         * consume quota
+         */
+        await userQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
+
+        /*
+         * create prompt history record
+         */
+        const promptHistory = await PromptHistory.create({
+            prompt: prompt,
+            prompt_english: transRes,
+        });
+        const generateHistory = await UserGenerateHistory.create({
+            user_id: userId,
+            style: style,
+            prompt_history_id: promptHistory.id,
+            status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING,
+            images: '',
+        });
+
+        res.send({
+            generateHistoryId: generateHistory.id,
+        });
+    } catch (e) {
+        log.error(`[API_LOGS][/draw] ${e.message}`);
+        res.status(500).send({
+            message: e.message,
+        });
     }
-    const transRes = await translate(prompt);
-
-    /*
-     * consume quota
-     */
-    await userQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
-
-    /*
-     * create prompt history record
-     */
-    const promptHistory = await PromptHistory.create({
-        prompt: prompt,
-        prompt_english: transRes,
-    });
-    const generateHistory = await UserGenerateHistory.create({
-        user_id: userId,
-        style: style,
-        prompt_history_id: promptHistory.id,
-        status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING,
-        images: '',
-    });
-
-    res.send({
-        generateHistoryId: generateHistory.id,
-    });
 });
 
 export default router;
