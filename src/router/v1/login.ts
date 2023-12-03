@@ -13,6 +13,15 @@ const logger = new Logger(__filename);
 const appId = env.wechatMiniProgram.appid;
 const WxBizDataCrypt = require('../../clients/wechat/WXBizDataCrypt');
 
+async function generateInviteCode() {
+    const inviteCode = uuidv4().substring(0, 4);
+    const user = await User.getByInviteCode(inviteCode);
+    if (user) {
+        return generateInviteCode();
+    }
+    return inviteCode;
+}
+
 /**
  * @api {get} /login 用户登录
  */
@@ -29,6 +38,7 @@ router.post('', async (req, res) => {
         userId?: string;
         nickname?: string;
         sessionKey?: string;
+        inviteCode?: string;
     } = {};
 
     if (user) {
@@ -51,11 +61,14 @@ router.post('', async (req, res) => {
         result.userId = user.user_id;
         result.nickname = user.nickname;
         result.sessionKey = user.session_key;
+        result.inviteCode = user.invite_code;
     } else {
         logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
+        const inviteCode = await generateInviteCode();
+        logger.info(`[API_LOGS][/login] Invite code: ${inviteCode}`);
         //如果没有该用户，创建一个新用户
         user = await User.create({
-            nickname: 'wx_' + uuidv4().substring(0, 8),
+            nickname: 'wx_' + inviteCode,
             avatar_url: '',
             user_id: uuidv4(),
             appid: appId,
@@ -63,6 +76,7 @@ router.post('', async (req, res) => {
             unionid: '',
             session_key: session_key,
             access_token: '',
+            invite_code: inviteCode,
         });
         logger.info(`[API_LOGS][/login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
         await userQuotaHistoryService.initQuota({ userId: user.user_id });
@@ -70,6 +84,7 @@ router.post('', async (req, res) => {
         result.userId = user.user_id;
         result.nickname = user.nickname;
         result.sessionKey = user.session_key;
+        result.inviteCode = user.invite_code;
     }
 
     res.status(200).send(result);
