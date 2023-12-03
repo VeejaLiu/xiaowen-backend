@@ -75,40 +75,42 @@ router.post('', async (req, res) => {
     res.status(200).send(result);
 });
 
-async function generateInviteInfo({ loginUserId, inviteUserId }: { inviteUserId: string; loginUserId: string }) {
+async function generateInviteInfo({ loginUserId, inviteCode }: { loginUserId: string; inviteCode: string }) {
     const logPre = '[login][generateInviteInfo]';
 
-    if (!inviteUserId) {
-        logger.info(`${logPre} No invite user [end]`);
+    if (!inviteCode) {
+        logger.info(`${logPre} No invite code [end]`);
+        return;
+    }
+
+    logger.info(`${logPre} Invite code: ${inviteCode}, login user id: ${loginUserId}`);
+
+    const user = await User.findOne({ where: { user_id: loginUserId } });
+    if (user.invited_by_user_id) {
+        logger.info(`${logPre} User[${loginUserId}] already has invite user: ${user.invited_by_user_id} [end]`);
+        return;
+    }
+
+    const invitedByUser = await User.getByInviteCode(inviteCode);
+    if (!invitedByUser) {
+        logger.error(`${logPre} invalid invite user not found, inviteCode: ${inviteCode} [end]`);
         return;
     }
 
     // check if invite user id is same with login user id
-    if (loginUserId === inviteUserId) {
+    const invitedByUserId = invitedByUser.user_id;
+    if (loginUserId === invitedByUserId) {
         logger.info(`${logPre} Invite user id is same with login user id [end]`);
         return;
     }
 
-    logger.info(`${logPre} Invite user id: ${inviteUserId}, login user id: ${loginUserId}`);
-
-    const user = await User.getByUserId(loginUserId);
-    if (user.invite_user_id) {
-        logger.info(`${logPre} User[${loginUserId}] already has invite user: ${user.invite_user_id} [end]`);
-        return;
-    }
-
-    const inviteUser = await User.getByUserId(inviteUserId);
-    if (!inviteUser) {
-        logger.error(`${logPre} invalid invite user not found, inviteUserId: ${inviteUserId} [end]`);
-        return;
-    }
-
     // update invite user id
-    await User.update({ invite_user_id: inviteUserId }, { where: { user_id: loginUserId } });
-    logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${inviteUserId}`);
+    user.invited_by_user_id = invitedByUserId;
+    await user.save();
+    logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${invitedByUserId}`);
     // update invite user quota
-    await userQuotaHistoryService.addQuotaForInvite({ userId: inviteUserId });
-    logger.info(`${logPre} Add quota for user[${inviteUserId}]`);
+    await userQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
+    logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
 
     logger.info(`${logPre} success`);
 }
@@ -119,7 +121,7 @@ async function generateInviteInfo({ loginUserId, inviteUserId }: { inviteUserId:
 router.post('/getPhoneNumber', async (req: any, res) => {
     const logPre = '[API_LOGS][/login/getPhoneNumber]';
     const sessionKey = req.headers.session_key;
-    const { user_id: userId, inviteUserId, encryptedData, iv, code } = req.body;
+    const { user_id: userId, inviteCode, encryptedData, iv, code } = req.body;
     logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
     const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
@@ -128,7 +130,7 @@ router.post('/getPhoneNumber', async (req: any, res) => {
 
     const { phoneNumber, countryCode } = data;
 
-    const user = await User.getByUserId(userId);
+    const user = await User.getRawByUserId(userId);
     if (!user) {
         return res.status(400).send({
             success: false,
@@ -141,7 +143,7 @@ router.post('/getPhoneNumber', async (req: any, res) => {
         phoneNumber: phoneNumber,
     });
 
-    await generateInviteInfo({ loginUserId: userId, inviteUserId });
+    await generateInviteInfo({ loginUserId: userId, inviteCode: inviteCode });
 
     const token = signToken(user);
 
