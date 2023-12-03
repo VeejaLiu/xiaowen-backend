@@ -77,6 +77,7 @@ export async function executeTaskFromQueue() {
         });
         logger.info(`[generate-queue][executeTaskFromQueue] Update prompt history status to success`);
 
+        // 发送成功通知
         await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
     } catch (e) {
         if (generateHistory.user_id === 'admin') {
