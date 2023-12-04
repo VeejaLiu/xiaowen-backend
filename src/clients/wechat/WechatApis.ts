@@ -125,24 +125,24 @@ export class WechatApis {
     /**
      * 生成小程序码
      */
-    static async getWxacodeUnlimit({ inviteCode }: { inviteCode: string }): Promise<Buffer> {
-        try {
-            const accessToken = await this.getStableAccessToken();
-            const wxRes = await fetch(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    scene: `inviteBy=${inviteCode}`,
-                    page: 'pages/index/index',
-                    width: 280,
-                    check_path: false,
-                }),
-            });
-
-            const wxResBuffer = await wxRes.buffer();
-            return wxResBuffer;
-        } catch (e) {
-            logger.error(`[getWxacodeUnlimit] ${e}`);
-            throw e;
-        }
-    }
+    // static async getWxacodeUnlimit({ inviteCode }: { inviteCode: string }): Promise<Buffer> {
+    //     try {
+    //         const accessToken = await this.getStableAccessToken();
+    //         const wxRes = await fetch(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${accessToken}`, {
+    //             method: 'POST',
+    //             body: JSON.stringify({
+    //                 scene: `inviteBy=${inviteCode}`,
+    //                 page: 'pages/index/index',
+    //                 width: 280,
+    //                 check_path: false,
+    //             }),
+    //         });
+    //
+    //         const wxResBuffer = await wxRes.buffer();
+    //         return wxResBuffer;
+    //     } catch (e) {
+    //         logger.error(`[getWxacodeUnlimit] ${e}`);
+    //         throw e;
+    //     }
+    // }
 }
