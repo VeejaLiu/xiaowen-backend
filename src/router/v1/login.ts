@@ -134,38 +134,45 @@ async function generateInviteInfo({ loginUserId, inviteBy }: { loginUserId: stri
  * @api {get} /login/inviteCode 邀请码
  */
 router.post('/getPhoneNumber', async (req: any, res) => {
-    const logPre = '[API_LOGS][/login/getPhoneNumber]';
-    const sessionKey = req.headers.session_key;
-    const { user_id: userId, inviteBy, encryptedData, iv, code } = req.body;
-    logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
+    try {
+        const logPre = '[API_LOGS][/login/getPhoneNumber]';
+        const { user_id: userId, inviteBy, encryptedData, iv, code, session_key: sessionKey } = req.body;
+        logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
-    const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
-    const data = wxBizDataCrypt.decryptData(encryptedData, iv);
-    logger.info(`${logPre} ${JSON.stringify(data)}`);
+        const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
+        const data = wxBizDataCrypt.decryptData(encryptedData, iv);
+        logger.info(`${logPre} ${JSON.stringify(data)}`);
 
-    const { phoneNumber, countryCode } = data;
+        const { phoneNumber, countryCode } = data;
 
-    const user = await User.getRawByUserId(userId);
-    if (!user) {
-        return res.status(400).send({
+        const user = await User.getRawByUserId(userId);
+        if (!user) {
+            return res.status(400).send({
+                success: false,
+                message: 'User not found',
+            });
+        }
+        await User.updatePhoneInfo({
+            userId: userId,
+            phoneCode: countryCode,
+            phoneNumber: phoneNumber,
+        });
+
+        await generateInviteInfo({ loginUserId: userId, inviteBy: inviteBy });
+
+        const token = signToken(user);
+
+        res.status(200).send({
+            success: true,
+            data: { ...user, token: token },
+        });
+    } catch (e) {
+        logger.error(`[API_LOGS][/login/getPhoneNumber] ${e.message}`);
+        res.status(400).send({
             success: false,
-            message: 'User not found',
+            message: e.message,
         });
     }
-    await User.updatePhoneInfo({
-        userId: userId,
-        phoneCode: countryCode,
-        phoneNumber: phoneNumber,
-    });
-
-    await generateInviteInfo({ loginUserId: userId, inviteBy: inviteBy });
-
-    const token = signToken(user);
-
-    res.status(200).send({
-        success: true,
-        data: { ...user, token: token },
-    });
 });
 
 export default router;
