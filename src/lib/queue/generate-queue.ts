@@ -21,6 +21,7 @@ async function sendNotification({
     promptHistory: PromptHistory;
     success: boolean;
 }) {
+    await userGenerateHistory.reload();
     if (userGenerateHistory.notification !== 1) {
         logger.info(`[generate-queue][sendNotification][${userGenerateHistory.id}] notification is not enabled`);
         return;
