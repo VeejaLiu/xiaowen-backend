@@ -17,9 +17,16 @@ router.post('/', async (req: any, res) => {
     const { rate, content } = req.body;
 
     logger.info(`[/feedback] userId: ${userId}, rate: ${rate}, content: ${content}`);
+    if (!rate || !content || !userId) {
+        res.send({
+            success: false,
+            message: '参数错误',
+        });
+        return;
+    }
 
     await UserFeedback.create({
-        userId: userId,
+        user_id: userId,
         rate: Number(rate),
         content: content,
     });
