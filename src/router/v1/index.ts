@@ -9,4 +9,5 @@ router.use('/login', require('./login').default);
 // router.use('/admin', require('./admin').default);
 router.use('/history', require('./history').default);
 router.use('/notification', require('./notification').default);
+router.use('/feedback', require('./feedback').default);
 export default router;

@@ -85,3 +85,16 @@ CREATE TABLE `user_quota_history`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+# 用户反馈表 user_feedback
+CREATE TABLE `user_feedback`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT,
+    `user_id`     varchar(36)         DEFAULT NULL COMMENT '用户id',
+    `rate`        INT        NOT NULL DEFAULT 0 COMMENT '评分',
+    `content`     TEXT       NOT NULL COMMENT '反馈内容',
+    `create_time` datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
