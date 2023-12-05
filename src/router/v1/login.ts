@@ -13,6 +13,15 @@ const logger = new Logger(__filename);
 const appId = env.wechatMiniProgram.appid;
 const WxBizDataCrypt = require('../../clients/wechat/WXBizDataCrypt');
 
+async function generateInviteCode() {
+    const inviteCode = uuidv4().substring(0, 4);
+    const user = await User.getByInviteCode(inviteCode);
+    if (user) {
+        return generateInviteCode();
+    }
+    return inviteCode;
+}
+
 /**
  * @api {get} /login 用户登录
  */
@@ -29,6 +38,7 @@ router.post('', async (req, res) => {
         userId?: string;
         nickname?: string;
         sessionKey?: string;
+        inviteCode?: string;
     } = {};
 
     if (user) {
@@ -51,11 +61,14 @@ router.post('', async (req, res) => {
         result.userId = user.user_id;
         result.nickname = user.nickname;
         result.sessionKey = user.session_key;
+        result.inviteCode = user.invite_code;
     } else {
         logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
+        const inviteCode = await generateInviteCode();
+        logger.info(`[API_LOGS][/login] Invite code: ${inviteCode}`);
         //如果没有该用户，创建一个新用户
         user = await User.create({
-            nickname: 'wx_' + uuidv4().substring(0, 8),
+            nickname: 'wx_' + inviteCode,
             avatar_url: '',
             user_id: uuidv4(),
             appid: appId,
@@ -63,6 +76,7 @@ router.post('', async (req, res) => {
             unionid: '',
             session_key: session_key,
             access_token: '',
+            invite_code: inviteCode,
         });
         logger.info(`[API_LOGS][/login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
         await userQuotaHistoryService.initQuota({ userId: user.user_id });
@@ -70,45 +84,48 @@ router.post('', async (req, res) => {
         result.userId = user.user_id;
         result.nickname = user.nickname;
         result.sessionKey = user.session_key;
+        result.inviteCode = user.invite_code;
     }
 
     res.status(200).send(result);
 });
 
-async function generateInviteInfo({ loginUserId, inviteUserId }: { inviteUserId: string; loginUserId: string }) {
+async function generateInviteInfo({ loginUserId, inviteBy }: { loginUserId: string; inviteBy: string }) {
     const logPre = '[login][generateInviteInfo]';
 
-    if (!inviteUserId) {
-        logger.info(`${logPre} No invite user [end]`);
+    if (!inviteBy) {
+        logger.info(`${logPre} No invite by [end]`);
+        return;
+    }
+
+    logger.info(`${logPre} Invite by: ${inviteBy}, login user id: ${loginUserId}`);
+
+    const user = await User.findOne({ where: { user_id: loginUserId } });
+    if (user.invited_by_user_id) {
+        logger.info(`${logPre} User[${loginUserId}] already has invite user: ${user.invited_by_user_id} [end]`);
+        return;
+    }
+
+    const invitedByUser = await User.getByInviteCode(inviteBy);
+    if (!invitedByUser) {
+        logger.error(`${logPre} invalid invite user not found, inviteBy: ${inviteBy} [end]`);
         return;
     }
 
     // check if invite user id is same with login user id
-    if (loginUserId === inviteUserId) {
+    const invitedByUserId = invitedByUser.user_id;
+    if (loginUserId === invitedByUserId) {
         logger.info(`${logPre} Invite user id is same with login user id [end]`);
         return;
     }
 
-    logger.info(`${logPre} Invite user id: ${inviteUserId}, login user id: ${loginUserId}`);
-
-    const user = await User.getByUserId(loginUserId);
-    if (user.invite_user_id) {
-        logger.info(`${logPre} User[${loginUserId}] already has invite user: ${user.invite_user_id} [end]`);
-        return;
-    }
-
-    const inviteUser = await User.getByUserId(inviteUserId);
-    if (!inviteUser) {
-        logger.error(`${logPre} invalid invite user not found, inviteUserId: ${inviteUserId} [end]`);
-        return;
-    }
-
     // update invite user id
-    await User.update({ invite_user_id: inviteUserId }, { where: { user_id: loginUserId } });
-    logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${inviteUserId}`);
+    user.invited_by_user_id = invitedByUserId;
+    await user.save();
+    logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${invitedByUserId}`);
     // update invite user quota
-    await userQuotaHistoryService.addQuotaForInvite({ userId: inviteUserId });
-    logger.info(`${logPre} Add quota for user[${inviteUserId}]`);
+    await userQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
+    logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
 
     logger.info(`${logPre} success`);
 }
@@ -117,38 +134,45 @@ async function generateInviteInfo({ loginUserId, inviteUserId }: { inviteUserId:
  * @api {get} /login/inviteCode 邀请码
  */
 router.post('/getPhoneNumber', async (req: any, res) => {
-    const logPre = '[API_LOGS][/login/getPhoneNumber]';
-    const sessionKey = req.headers.session_key;
-    const { user_id: userId, inviteUserId, encryptedData, iv, code } = req.body;
-    logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
+    try {
+        const logPre = '[API_LOGS][/login/getPhoneNumber]';
+        const { user_id: userId, inviteBy, encryptedData, iv, code, session_key: sessionKey } = req.body;
+        logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
-    const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
-    const data = wxBizDataCrypt.decryptData(encryptedData, iv);
-    logger.info(`${logPre} ${JSON.stringify(data)}`);
+        const wxBizDataCrypt = new WxBizDataCrypt(appId, sessionKey);
+        const data = wxBizDataCrypt.decryptData(encryptedData, iv);
+        logger.info(`${logPre} ${JSON.stringify(data)}`);
 
-    const { phoneNumber, countryCode } = data;
+        const { phoneNumber, countryCode } = data;
 
-    const user = await User.getByUserId(userId);
-    if (!user) {
-        return res.status(400).send({
+        const user = await User.getRawByUserId(userId);
+        if (!user) {
+            return res.status(400).send({
+                success: false,
+                message: 'User not found',
+            });
+        }
+        await User.updatePhoneInfo({
+            userId: userId,
+            phoneCode: countryCode,
+            phoneNumber: phoneNumber,
+        });
+
+        await generateInviteInfo({ loginUserId: userId, inviteBy: inviteBy });
+
+        const token = signToken(user);
+
+        res.status(200).send({
+            success: true,
+            data: { ...user, token: token },
+        });
+    } catch (e) {
+        logger.error(`[API_LOGS][/login/getPhoneNumber] ${e.message}`);
+        res.status(400).send({
             success: false,
-            message: 'User not found',
+            message: e.message,
         });
     }
-    await User.updatePhoneInfo({
-        userId: userId,
-        phoneCode: countryCode,
-        phoneNumber: phoneNumber,
-    });
-
-    await generateInviteInfo({ loginUserId: userId, inviteUserId });
-
-    const token = signToken(user);
-
-    res.status(200).send({
-        success: true,
-        data: { ...user, token: token },
-    });
 });
 
 export default router;

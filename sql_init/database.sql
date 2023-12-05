@@ -6,21 +6,22 @@ USE xiaowen_ai;
 # user table
 create table user
 (
-    id             bigint auto_increment
+    id                 bigint auto_increment
         primary key,
-    user_id        varchar(36)                            null,
-    nickname       varchar(255)                           null comment '用户昵称',
-    avatar_url     varchar(500)                           null comment '用户头像地址',
-    appid          varchar(255) default ''                not null comment '小程序appid',
-    openid         varchar(255) default ''                not null comment '小程序openid',
-    unionid        varchar(255) default ''                not null comment '小程序unionid',
-    session_key    varchar(255) default ''                not null comment '小程序session_key',
-    access_token   varchar(255) default ''                not null comment '小程序access_token',
-    phone_code     varchar(20)                            null comment '手机区号',
-    phone_number   varchar(20)                            null comment '手机号码',
-    invite_user_id varchar(36)                            null comment '邀请用户',
-    create_time    datetime     default CURRENT_TIMESTAMP not null,
-    update_time    datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
+    user_id            varchar(36)                            null,
+    nickname           varchar(255)                           null comment '用户昵称',
+    avatar_url         varchar(500)                           null comment '用户头像地址',
+    appid              varchar(255) default ''                not null comment '小程序appid',
+    openid             varchar(255) default ''                not null comment '小程序openid',
+    unionid            varchar(255) default ''                not null comment '小程序unionid',
+    session_key        varchar(255) default ''                not null comment '小程序session_key',
+    access_token       varchar(255) default ''                not null comment '小程序access_token',
+    phone_code         varchar(20)                            null comment '手机区号',
+    phone_number       varchar(20)                            null comment '手机号码',
+    invite_code        varchar(4)                             null comment '邀请码，该用户的邀请码',
+    invited_by_user_id varchar(36)                            null comment '邀请该用户的用户user_id',
+    create_time        datetime     default CURRENT_TIMESTAMP not null,
+    update_time        datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
 )
     charset = utf8mb4;
 
@@ -81,6 +82,19 @@ CREATE TABLE `user_quota_history`
     `change_reason` varchar(255)         DEFAULT NULL COMMENT '额度变化的原因',
     `create_time`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time`   datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+# 用户反馈表 user_feedback
+CREATE TABLE `user_feedback`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT,
+    `user_id`     varchar(36)         DEFAULT NULL COMMENT '用户id',
+    `rate`        INT        NOT NULL DEFAULT 0 COMMENT '评分',
+    `content`     TEXT       NOT NULL COMMENT '反馈内容',
+    `create_time` datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` datetime   NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;

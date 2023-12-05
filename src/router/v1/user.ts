@@ -26,6 +26,7 @@ router.get('/info', async (req: any, res) => {
         avatarUrl: user.avatar_url,
         createTime: user.create_time,
         quota: userQuota.quota,
+        inviteCode: user.invite_code,
     });
 });
 

@@ -30,11 +30,10 @@ router.get('', async (req: any, res) => {
                  left join prompt_history as ph
                            on ugh.prompt_history_id = ph.id
         WHERE ugh.user_id = '${userId}'
-            ${style ? `AND ugh.style = '${style}'` : ''}
-            ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
-        ORDER BY ugh.id DESC
-        LIMIT ${Number(start) || 0}, ${Number(limit) || 10};
+            ${style ? `AND ugh.style = '${style}'` : ''} ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
+        ORDER BY ugh.id DESC;
     `);
+    // LIMIT ${Number(start) || 0}, ${Number(limit) || 10};
     const countSqlRes = await sequelize.query(`
         select count(ugh.id) as count
         from user_generate_history as ugh
