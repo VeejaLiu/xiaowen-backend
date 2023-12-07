@@ -46,15 +46,7 @@ router.post('', async (req, res) => {
 
         if (session_key !== user.session_key) {
             logger.info(`[API_LOGS][/login] session_key changed, user_id: ${user.user_id}, openid: ${openid}`);
-            await User.update(
-                { session_key: session_key },
-                {
-                    where: {
-                        openid: openid,
-                    },
-                },
-            );
-            user = await User.findOne({ where: { openid: openid } });
+            await user.update({ session_key: session_key });
         }
 
         //如果有该用户
