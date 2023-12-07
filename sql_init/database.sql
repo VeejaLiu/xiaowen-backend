@@ -25,6 +25,8 @@ create table user
 )
     charset = utf8mb4;
 
+# 为USER表添加索引, openid
+ALTER TABLE `user` ADD INDEX `idx_openid` (`openid`);
 
 # generate history table
 CREATE TABLE `user_generate_history`
