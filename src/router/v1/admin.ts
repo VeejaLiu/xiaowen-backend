@@ -70,7 +70,6 @@ router.get('/history', async (req: any, res) => {
         from user_generate_history as ugh
                  left join prompt_history as ph
                            on ugh.prompt_history_id = ph.id
-        WHERE ugh.user_id = 'admin'
         ORDER BY ugh.id DESC`);
     const countSqlRes = await sequelize.query(`
         select count(ugh.id) as count
