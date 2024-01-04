@@ -19,8 +19,12 @@ const logger = new Logger(__filename);
  */
 router.post('/draw', async (req: any, res) => {
     logger.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
+    const { prompt } = req.body;
+    const transRes = await translate(prompt);
+    console.log(transRes);
     res.status(200).send({
         generateHistoryId: 0,
+        translateRes: transRes,
     });
     // let { style, prompt } = req.body;
     //

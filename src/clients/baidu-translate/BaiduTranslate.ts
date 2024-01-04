@@ -56,10 +56,10 @@ class BaiduTranslateClient {
                 const data = await response.json();
                 return data.trans_result.map((item: any) => item.dst).join(' ');
             } else {
-                log.error('Error:', response.status, response.statusText);
+                log.error('response is not ok: ', response.status, response.statusText);
             }
         } catch (error) {
-            log.error('Error:', error);
+            log.error('[translate] Error:', error.message);
         }
     }
 }
