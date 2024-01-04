@@ -23,9 +23,10 @@ export async function login({ code, inviteCode }: { code: string; inviteCode: st
     sessionKey?: string;
     inviteCode?: string;
 }> {
+    logger.info(`[login] code: ${code}, inviteCode: ${inviteCode}`);
     const wxRes = await WechatApis.code2session(code);
     const { openid, session_key } = wxRes;
-    logger.info(`[API_LOGS][/login] ${JSON.stringify(wxRes)}`);
+    logger.info(`[login] ${JSON.stringify(wxRes)}`);
 
     //查询数据库中是否有该用户
     let user = await User.findOne({ where: { openid: openid } });
@@ -38,10 +39,10 @@ export async function login({ code, inviteCode }: { code: string; inviteCode: st
     } = {};
 
     if (user) {
-        logger.info(`[API_LOGS][/login] Login success, user_id: ${user.user_id}, openid: ${openid}`);
+        logger.info(`[login] Login success, user_id: ${user.user_id}, openid: ${openid}`);
 
         if (session_key !== user.session_key) {
-            logger.info(`[API_LOGS][/login] session_key changed, user_id: ${user.user_id}, openid: ${openid}`);
+            logger.info(`[login] session_key changed, user_id: ${user.user_id}, openid: ${openid}`);
             await user.update({ session_key: session_key });
         }
 
@@ -51,9 +52,9 @@ export async function login({ code, inviteCode }: { code: string; inviteCode: st
         result.sessionKey = user.session_key;
         result.inviteCode = user.invite_code;
     } else {
-        logger.info(`[API_LOGS][/login] New user, openid: ${openid}`);
+        logger.info(`[login] New user, openid: ${openid}`);
         const inviteCode = await generateInviteCode();
-        logger.info(`[API_LOGS][/login] Invite code: ${inviteCode}`);
+        logger.info(`[login] Invite code: ${inviteCode}`);
         //如果没有该用户，创建一个新用户
         user = await User.create({
             nickname: 'wx_' + inviteCode,
@@ -66,7 +67,7 @@ export async function login({ code, inviteCode }: { code: string; inviteCode: st
             access_token: '',
             invite_code: inviteCode,
         });
-        logger.info(`[API_LOGS][/login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
+        logger.info(`[login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
         await userQuotaHistoryService.initQuota({ userId: user.user_id });
 
         result.userId = user.user_id;

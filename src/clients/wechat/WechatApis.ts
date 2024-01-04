@@ -35,10 +35,10 @@ export class WechatApis {
             if (wxResJson.errcode) {
                 throw new Error(wxResJson.errcode);
             }
-
             return wxResJson;
         } catch (e) {
-            logger.error(`[code2session] ${e}`);
+            logger.error(`[code2session] appId: ${this.appId}, appSecret: ${this.appSecret}, code: ${code}`);
+            logger.error(`[code2session] e.message: ${e.message}`);
             throw e;
         }
     }
