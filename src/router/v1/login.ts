@@ -10,9 +10,10 @@ const logger = new Logger(__filename);
  * @api {get} /login 用户登录
  */
 router.post('', async (req, res) => {
+    logger.info(`[API_LOGS][/login] ${JSON.stringify(req.body)}`);
     const { code, inviteCode } = req.body;
     try {
-        const result = await login(code);
+        const result = await login({ code: code });
         res.status(200).send(result);
     } catch (e) {
         logger.error(`[API_LOGS][/login] ${e.message}`);
