@@ -19,37 +19,40 @@ const logger = new Logger(__filename);
  */
 router.post('/draw', async (req: any, res) => {
     logger.info(`[API_LOGS][/draw] ${JSON.stringify(req.body)}`);
-    let { style, prompt } = req.body;
-
-    /*
-     * prompt process
-     */
-    prompt = prompt.trim();
-    if (!prompt || prompt.length === 0) {
-        logger.error(`[API_LOGS][/draw] prompt is empty`);
-        return res.status(400).send('prompt is empty');
-    }
-    const transRes = await translate(prompt);
-
-    /*
-     * create prompt history record
-     */
-    const promptHistory = await PromptHistory.create({
-        prompt: prompt,
-        prompt_english: transRes,
+    res.status(200).send({
+        generateHistoryId: 0,
     });
-    const generateHistory = await UserGenerateHistory.create({
-        user_id: 'admin',
-        style: style,
-        prompt_history_id: promptHistory.id,
-        status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING,
-        images: '',
-    });
-
-    logger.info(`[API_LOGS][/draw] generateHistory: ${JSON.stringify(generateHistory.id)}`);
-    res.send({
-        generateHistoryId: generateHistory.id,
-    });
+    // let { style, prompt } = req.body;
+    //
+    // /*
+    //  * prompt process
+    //  */
+    // prompt = prompt.trim();
+    // if (!prompt || prompt.length === 0) {
+    //     logger.error(`[API_LOGS][/draw] prompt is empty`);
+    //     return res.status(400).send('prompt is empty');
+    // }
+    // const transRes = await translate(prompt);
+    //
+    // /*
+    //  * create prompt history record
+    //  */
+    // const promptHistory = await PromptHistory.create({
+    //     prompt: prompt,
+    //     prompt_english: transRes,
+    // });
+    // const generateHistory = await UserGenerateHistory.create({
+    //     user_id: 'admin',
+    //     style: style,
+    //     prompt_history_id: promptHistory.id,
+    //     status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING,
+    //     images: '',
+    // });
+    //
+    // logger.info(`[API_LOGS][/draw] generateHistory: ${JSON.stringify(generateHistory.id)}`);
+    // res.send({
+    //     generateHistoryId: generateHistory.id,
+    // });
 });
 
 router.get('/history', async (req: any, res) => {
@@ -68,16 +71,11 @@ router.get('/history', async (req: any, res) => {
                ugh.images             as images,
                ugh.create_time        as create_time
         from user_generate_history as ugh
-                 left join prompt_history as ph
-                           on ugh.prompt_history_id = ph.id
-        WHERE ugh.user_id = 'admin'
+                 left join prompt_history as ph on ugh.prompt_history_id = ph.id
         ORDER BY ugh.id DESC`);
     const countSqlRes = await sequelize.query(`
-        select count(ugh.id) as count
-        from user_generate_history as ugh
-                 left join prompt_history as ph
-                           on ugh.prompt_history_id = ph.id
-        WHERE ugh.user_id = 'admin'`);
+        select count(ugh.id) as count from user_generate_history as ugh
+        left join prompt_history as ph on ugh.prompt_history_id = ph.id`);
     const history = sqlRes[0].map((item: any) => ({
         id: item.id,
         userId: item.user_id,
