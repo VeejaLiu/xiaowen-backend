@@ -13,7 +13,7 @@ router.use(verifyToken);
  */
 router.get('', async (req: any, res) => {
     logger.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
-    const { keyword, style, start, limit } = req.query;
+    const { keyword, style, start = 0, limit = 5 } = req.query;
     const { userId } = req.user;
     logger.info(`[API_LOGS][/history] userId: ${userId}`);
 
@@ -31,8 +31,8 @@ router.get('', async (req: any, res) => {
                            on ugh.prompt_history_id = ph.id
         WHERE ugh.user_id = '${userId}'
             ${style ? `AND ugh.style = '${style}'` : ''} ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
-        ORDER BY ugh.id DESC;
-    `);
+        ORDER BY ugh.id DESC
+        limit ${Number(start)}, ${Number(limit)}`);
     // LIMIT ${Number(start) || 0}, ${Number(limit) || 10};
     const countSqlRes = await sequelize.query(`
         select count(ugh.id) as count
