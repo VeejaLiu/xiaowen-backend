@@ -76,7 +76,8 @@ router.get('/history', async (req: any, res) => {
                ugh.create_time        as create_time
         from user_generate_history as ugh
                  left join prompt_history as ph on ugh.prompt_history_id = ph.id
-        ORDER BY ugh.id DESC`);
+        ORDER BY ugh.id DESC
+        limit ${(page - 1) * pageSize}, ${pageSize}`);
     const countSqlRes = await sequelize.query(`
         select count(ugh.id) as count from user_generate_history as ugh
         left join prompt_history as ph on ugh.prompt_history_id = ph.id`);
