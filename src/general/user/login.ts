@@ -17,13 +17,16 @@ async function generateInviteCode() {
     return inviteCode;
 }
 
-export async function login({ code, inviteCode }: { code: string; inviteCode: string }): Promise<{
+export async function login({ code }: { code: string }): Promise<{
     userId?: string;
     nickname?: string;
     sessionKey?: string;
     inviteCode?: string;
 }> {
-    logger.info(`[login] code: ${code}, inviteCode: ${inviteCode}`);
+    logger.info(`[login] code: ${code}`);
+    if (!code || code === '') {
+        throw new Error('Missing code');
+    }
     const wxRes = await WechatApis.code2session(code);
     const { openid, session_key } = wxRes;
     logger.info(`[login] ${JSON.stringify(wxRes)}`);
