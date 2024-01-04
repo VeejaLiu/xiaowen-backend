@@ -63,7 +63,6 @@ export async function getPhoneNumber({
     userId: any;
     iv: any;
 }): Promise<any> {
-    await getPhoneNumber({ userId, inviteBy, encryptedData, iv, code, sessionKey });
     const logPre = '[API_LOGS][/login/getPhoneNumber]';
     logger.info(`${logPre} userId: ${userId}, sessionKey: ${sessionKey}, code: ${code}`);
 
