@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import index from './router';
 import { Logger } from './lib/logger';
 import { banner } from './lib/banner';
@@ -24,9 +24,20 @@ loadMonitor(app);
 loadWinston();
 const log = new Logger(__filename);
 
-app.use(function (err, req, res, next) {
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     console.error(`[APP][Error] ${err.stack}`);
     res.status(500).send('Something broke!');
+};
+app.use(errorHandler);
+
+// 捕获未捕获的异常
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+// 捕获未处理的 Promise 拒绝
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 app.listen(env.app.port, () => {
