@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 export enum TATTOO_STYLE {
     BLACK_WORK = 0,
     DOT_WORK = 1,

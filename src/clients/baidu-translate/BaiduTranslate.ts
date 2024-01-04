@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import { Logger } from '../../lib/logger';
 
 const log = new Logger(__filename);
+const fetch = require('node-fetch');
 
 class BaiduTranslateClient {
     private appid: string;

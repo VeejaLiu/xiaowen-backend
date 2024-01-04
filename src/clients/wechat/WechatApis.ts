@@ -3,6 +3,7 @@ import { Logger } from '../../lib/logger';
 import { env } from '../../env';
 
 const logger = new Logger('WechatApis');
+const fetch = require('node-fetch');
 
 export interface WechatCode2SessionResponse {
     openid: string;
