@@ -31,7 +31,10 @@ router.post('/getPhoneNumber', async (req: any, res) => {
     const { user_id: userId, inviteBy, encryptedData, iv, code, session_key: sessionKey } = req.body;
     try {
         const result = await getPhoneNumber({ userId, inviteBy, encryptedData, iv, code, sessionKey });
-        res.status(200).send(result);
+        res.status(200).send({
+            success: true,
+            data: result,
+        });
     } catch (e) {
         logger.error(`[API_LOGS][/login/getPhoneNumber] ${e.message}`);
         res.status(400).send({
