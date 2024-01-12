@@ -15,14 +15,15 @@ const minioClient = new Minio.Client({
 
 const BUCKET_NAME = env.minio.bucketName || 'pictures';
 
-export async function putObject(objectName: string, buffer: Buffer): Promise<boolean> {
+export async function putObject(objectName: string, buffer: Buffer): Promise<string | boolean> {
     try {
-        objectName = `${new Date().valueOf()}_${objectName}`;
         log.info(`putObject() objectName=[${objectName}]`);
-
         const UploadedObjectInfo = await minioClient.putObject(BUCKET_NAME, objectName, buffer);
         log.info('putObject() successfully, Result', UploadedObjectInfo);
-        return true;
+        // return path
+        const imageUrl = `http://${env.minio.endPoint}:${env.minio.port}/${BUCKET_NAME}/${objectName}`;
+        log.info(`putObject() imageUrl=[${imageUrl}]`);
+        return imageUrl;
     } catch (e) {
         log.error('putObject() error', e);
         return false;
