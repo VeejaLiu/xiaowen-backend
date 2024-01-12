@@ -26,7 +26,8 @@ create table user
     charset = utf8mb4;
 
 # 为USER表添加索引, openid
-ALTER TABLE `user` ADD INDEX `idx_openid` (`openid`);
+ALTER TABLE `user`
+    ADD INDEX `idx_openid` (`openid`);
 
 # generate history table
 CREATE TABLE `user_generate_history`
@@ -100,3 +101,6 @@ CREATE TABLE `user_feedback`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
+
+alter table prompt_history
+    add generate_sd_parameters TEXT null after prompt_english;

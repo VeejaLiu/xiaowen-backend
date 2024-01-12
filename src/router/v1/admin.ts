@@ -60,7 +60,7 @@ router.post('/draw', async (req: any, res) => {
 });
 
 router.get('/history', async (req: any, res) => {
-    logger.info(`[API_LOGS][/history] ${JSON.stringify(req.body)}`);
+    logger.info(`[API_LOGS][/history] ${JSON.stringify(req.query)}`);
     let { page, pageSize } = req.query;
     page = parseInt(page) || 1;
     pageSize = parseInt(pageSize) || 10;

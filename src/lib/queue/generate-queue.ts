@@ -70,14 +70,18 @@ export async function executeTaskFromQueue() {
         logger.info(`[generate-queue][executeTaskFromQueue] start draw`);
         const startTime = new Date().getTime();
         const result = await draw({ style: generateHistory.style, prompt: promptEnglish });
-        logger.info(`[generate-queue][executeTaskFromQueue] draw result: ${JSON.stringify(result)}`);
+        logger.info(`[generate-queue][executeTaskFromQueue] draw result: ${JSON.stringify(result.images)}`);
         const endTime = new Date().getTime();
         // update generate history
         await generateHistory.update({
             status: USER_QUOTA_HISTORY_CONSTANT.STATUS.SUCCESS,
-            images: JSON.stringify(result),
+            images: JSON.stringify(result.images),
             generate_used_time: endTime - startTime,
         });
+        await promptHistory.update({
+            generate_sd_parameters: JSON.stringify(result.parameters),
+        });
+
         logger.info(`[generate-queue][executeTaskFromQueue] Update prompt history status to success`);
 
         // 发送成功通知

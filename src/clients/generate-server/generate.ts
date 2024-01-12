@@ -1,18 +1,8 @@
-const fetch = require('node-fetch');
+import { GenerateConfig, TATTOO_STYLE } from './type';
+import { getGenerateConfig } from './generateConfig';
+import { putObject } from '../minio/minio';
 
-export enum TATTOO_STYLE {
-    BLACK_WORK = 0,
-    DOT_WORK = 1,
-    GEOMETRIC = 2,
-    WATERCOLOR = 3,
-    REALISM = 4,
-    NEO_TRADITIONAL = 5,
-    NEW_SCHOOL = 6,
-    JAPANESE = 7,
-    TRIBAL = 8,
-    LETTERING = 9,
-    TRASH_POLKA = 10,
-}
+const fetch = require('node-fetch');
 
 /**
  * Get images path from generate server
@@ -20,31 +10,59 @@ export enum TATTOO_STYLE {
  * @param body
  * @returns images path of minio, `bucketName/objectName`
  */
-export async function draw(body: {
-    style: TATTOO_STYLE;
-    prompt: string;
-}): Promise<{ images: string[]; used_time: number }> {
-    const response = await fetch('http://127.0.0.1:10102/draw', {
-        method: 'POST',
-        // request a image
+export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: string }): Promise<{
+    images: {
+        original: string;
+        thumbnail: string;
+    }[];
+    parameters?: any;
+}> {
+    // Get generate config
+    const generateConfig: GenerateConfig = await getGenerateConfig({ style, prompt });
+
+    // Send request to generate server
+    const generateRes = await fetch('http://region-42.seetacloud.com:53733/sdapi/v1/txt2img', {
         headers: {
             'Content-Type': 'application/json',
         },
+        method: 'POST',
         body: JSON.stringify({
-            prompt: `${body.prompt}`,
-            style: body.style,
+            prompt: generateConfig.prompt,
+            negative_prompt: generateConfig.negativePrompt,
+            batch_size: 4,
+            cfg_scale: 7,
+            steps: 20,
+            width: generateConfig.width,
+            height: generateConfig.height,
         }),
     });
-    return await response.json();
+    console.log(generateRes);
+    if (generateRes.status !== 200) {
+        console.log('generateRes.status !== 200');
+        return { images: [] };
+    }
 
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-    // return {
-    //     images: [
-    //         `tattoo/${new Date().valueOf()}_1.jpg`,
-    //         `tattoo/${new Date().valueOf()}_2.jpg`,
-    //         `tattoo/${new Date().valueOf()}_3.jpg`,
-    //         `tattoo/${new Date().valueOf()}_4.jpg`,
-    //     ],
-    //     used_time: 3000,
-    // };
+    const generateResJson = await generateRes.json();
+    console.log(generateResJson);
+    // Get images base64 from generate server
+    const images = generateResJson.images;
+
+    const imagePaths: { original: string; thumbnail: string }[] = [];
+    for (let i = 0; i < images.length; i++) {
+        const imageBase64: string = images[i];
+        const imageBuffer = Buffer.from(imageBase64, 'base64');
+        const objectName = `${new Date().toISOString()}_${i}.png`;
+        // upload image to minio
+        const minioPath = await putObject(objectName, imageBuffer);
+        // TODO create image thumbnail
+        if (minioPath === false) {
+            continue;
+        }
+        imagePaths.push({ original: minioPath as string, thumbnail: minioPath as string });
+    }
+    const parameters = generateResJson.parameters;
+    return {
+        images: imagePaths,
+        parameters,
+    };
 }
