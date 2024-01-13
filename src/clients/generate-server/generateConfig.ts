@@ -114,7 +114,7 @@ function getMinimalistConfig(description: string): GenerateConfig {
     // 正向提示词
     const prompt = [
         description,
-        'mmmmmlist',
+        'mmmmmlist, monochrome, greyscale',
         'minimalist',
         'minimal',
         'lineart',
