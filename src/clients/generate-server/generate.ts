@@ -1,8 +1,10 @@
 import { GenerateConfig, TATTOO_STYLE } from './type';
 import { getGenerateConfig } from './generateConfig';
 import { putObject } from '../minio/minio';
+import { Logger } from '../../lib/logger';
 
 const fetch = require('node-fetch');
+const log = new Logger(__filename);
 
 /**
  * Get images path from generate server
@@ -36,14 +38,15 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
             height: generateConfig.height,
         }),
     });
-    console.log(generateRes);
+    // console.log(generateRes);
     if (generateRes.status !== 200) {
-        console.log('generateRes.status !== 200');
-        return { images: [] };
+        log.error(`[draw] generate server error: ${generateRes.status}`);
+        throw new Error(`generate server error: ${generateRes.status}`);
     }
 
     const generateResJson = await generateRes.json();
-    console.log(generateResJson);
+    // console.log(generateResJson);
+
     // Get images base64 from generate server
     const images = generateResJson.images;
 
