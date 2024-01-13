@@ -43,7 +43,12 @@ const quality_prompt = [
 //     }
 function getDotWorkConfig(description: string): GenerateConfig {
     // 正向提示词
-    const prompt = [description, 'dotwork', '<lora:dotwork_for_dreamshaper8:1>', quality_prompt].join(', ');
+    const prompt = [
+        description,
+        'dotwork, monochrome, greyscale',
+        '<lora:dotwork_for_dreamshaper8:0.6>',
+        quality_prompt,
+    ].join(', ');
     // 负向提示词
     const negative_prompt = GENERAL_NEGATIVE_PROMPT;
     const height = 512;
