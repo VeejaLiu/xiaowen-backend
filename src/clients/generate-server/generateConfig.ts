@@ -123,7 +123,7 @@ function getMinimalistConfig(description: string): GenerateConfig {
     const prompt = [
         description,
         '<lora:minimalist-for-dreamshaper8:0.6>',
-        'mmmmmlist, monochrome, greyscale, tattoo design',
+        'mmmmmlist, monochrome, greyscale',
         quality_prompt,
     ].join(', ');
     // 负向提示词
@@ -159,7 +159,7 @@ function getMinimalistConfig(description: string): GenerateConfig {
 //     }
 function getGeometricConfig(description: string): GenerateConfig {
     // 正向提示词
-    const prompt = [description, 'geometric', '<lora:geo-5-for-dreamshaper:0.6>', quality_prompt].join(', ');
+    const prompt = [description, '<lora:geo-5-for-dreamshaper:0.6>', 'geometric', quality_prompt].join(', ');
     // 负向提示词
     const negative_prompt = GENERAL_NEGATIVE_PROMPT;
     const height = 640;
