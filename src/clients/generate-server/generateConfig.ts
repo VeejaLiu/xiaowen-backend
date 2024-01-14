@@ -122,8 +122,8 @@ function getMinimalistConfig(description: string): GenerateConfig {
     // 正向提示词
     const prompt = [
         description,
-        '<lora:minimalist-for_dreamshaper8:0.6>',
-        'mmmmmlist, monochrome, greyscale',
+        '<lora:minimalist-for-dreamshaper8:0.6>',
+        'mmmmmlist, monochrome, greyscale, tattoo design',
         quality_prompt,
     ].join(', ');
     // 负向提示词
