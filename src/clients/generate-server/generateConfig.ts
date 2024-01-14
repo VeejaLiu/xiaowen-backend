@@ -3,7 +3,7 @@ import { GenerateConfig, TATTOO_STYLE } from './type';
 // 通用负面提示词
 const GENERAL_NEGATIVE_PROMPT = [
     'nsfw',
-    'worst quality, low quality, normal quality, lowresolution, low resolution',
+    // 'worst quality, low quality, normal quality, lowresolution, low resolution',
     // # "poor anatomical structure, poor hand, text, errors, missing fingers, multiple fingers, "
     // # "few fingers, cropped, worst quality, low quality, normal quality, jpeg artifacts, "
     'signature, watermark, username, blurry, exposed, nipple, penis, penis, vagina, anus',
@@ -16,7 +16,7 @@ const GENERAL_NEGATIVE_PROMPT = [
 const quality_prompt = [
     'solo',
     // "hd, "
-    'no background',
+    // 'no background',
     'white background',
     // "beautiful pictures, ",
     // "masterpiece",
@@ -43,12 +43,15 @@ const quality_prompt = [
 //     }
 function getDotWorkConfig(description: string): GenerateConfig {
     // 正向提示词
-    const prompt = [
-        description,
-        'dotwork, monochrome, greyscale',
-        '<lora:dotwork_for_dreamshaper8:0.6>',
-        quality_prompt,
-    ].join(', ');
+    // const prompt = [
+    //     description,
+    //     'dotwork, monochrome, greyscale',
+    //     '<lora:dotwork_for_dreamshaper8:0.6>',
+    //     quality_prompt,
+    // ].join(', ');
+
+    // 正向提示词 V2
+    const prompt = [description, '<lora:stippling-1-for-dreamshaper:0.6>', 'stippling', quality_prompt].join(', ');
     // 负向提示词
     const negative_prompt = GENERAL_NEGATIVE_PROMPT;
     const height = 512;
@@ -119,11 +122,8 @@ function getMinimalistConfig(description: string): GenerateConfig {
     // 正向提示词
     const prompt = [
         description,
-        'mmmmmlist, monochrome, greyscale',
-        'minimalist',
-        'minimal',
-        'lineart',
         '<lora:minimalist-for_dreamshaper8:0.6>',
+        'mmmmmlist, monochrome, greyscale',
         quality_prompt,
     ].join(', ');
     // 负向提示词
