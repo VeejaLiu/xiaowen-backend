@@ -14,7 +14,7 @@ const GENERAL_NEGATIVE_PROMPT = [
 
 // # 画质固定提示词
 const quality_prompt = [
-    'solo',
+    // 'solo',
     // "hd, "
     // 'no background',
     'white background',
