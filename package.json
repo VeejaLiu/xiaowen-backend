@@ -4,8 +4,8 @@
     "description": "",
     "main": "src/app.ts",
     "engines": {
-        "node": "18.12.1",
-        "npm": "8.19.2"
+        "node": "18.20.3",
+        "npm": "10.7.0"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -33,6 +33,7 @@
         "node-fetch": "2.7.0",
         "nodemon": "3.0.1",
         "sequelize": "6.33.0",
+        "sharp": "^0.33.4",
         "uuid": "9.0.1",
         "winston": "3.10.0"
     },
