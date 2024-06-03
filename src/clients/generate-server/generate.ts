@@ -2,6 +2,7 @@ import { GenerateConfig, TATTOO_STYLE } from './type';
 import { getGenerateConfig } from './generateConfig';
 import { putObject } from '../minio/minio';
 import { Logger } from '../../lib/logger';
+import sharp from 'sharp';
 
 const fetch = require('node-fetch');
 const log = new Logger(__filename);
@@ -54,11 +55,15 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
     for (let i = 0; i < images.length; i++) {
         const imageBase64: string = images[i];
         const imageBuffer = Buffer.from(imageBase64, 'base64');
-        const objectName = `${new Date().toISOString()}_${i}.png`;
+        const objectName = `${new Date().toISOString()}_${i}`;
+        const imageName = `${objectName}.png`;
         // upload image to minio
-        const minioPath = await putObject(objectName, imageBuffer);
-        // TODO create image thumbnail
-        if (minioPath === false) {
+        const minioPath = await putObject(imageName, imageBuffer);
+        // create image thumbnail
+        const thumbnailBuffer = await sharp(imageBuffer).resize(200, 200).toBuffer();
+        const thumbnailName = `${objectName}_thumbnail.png`;
+        const thumbnailMinioPath = await putObject(thumbnailName, thumbnailBuffer);
+        if (minioPath === false || thumbnailMinioPath === false) {
             continue;
         }
         imagePaths.push({ original: minioPath as string, thumbnail: minioPath as string });
