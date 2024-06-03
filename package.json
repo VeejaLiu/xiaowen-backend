@@ -33,6 +33,7 @@
         "node-fetch": "2.7.0",
         "nodemon": "3.0.1",
         "sequelize": "6.33.0",
+        "sharp": "^0.33.4",
         "uuid": "9.0.1",
         "winston": "3.10.0"
     },
