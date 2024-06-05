@@ -51,34 +51,34 @@ class UserQuotaHistory extends Model {
     public create_time!: Date;
     public update_time!: Date;
 
-    /**
-     * 添加配额变更历史
-     */
-    public static async addHistory({
-        userId,
-        changeType,
-        changeReason,
-        quotaBefore,
-        changeAmount,
-        quotaAfter,
-    }: {
-        userId: string;
-        changeType: number;
-        changeReason: number;
-        quotaBefore: number;
-        changeAmount: number;
-        quotaAfter: number;
-    }): Promise<UserQuotaHistory> {
-        const userQuotaHistory = await UserQuotaHistory.create({
-            user_id: userId,
-            change_type: changeType,
-            change_reason: changeReason,
-            quota_before: quotaBefore,
-            change_amount: changeAmount,
-            quota_after: quotaAfter,
-        });
-        return userQuotaHistory;
-    }
+    // /**
+    //  * 添加配额变更历史
+    //  */
+    // public static async addHistory({
+    //     userId,
+    //     changeType,
+    //     changeReason,
+    //     quotaBefore,
+    //     changeAmount,
+    //     quotaAfter,
+    // }: {
+    //     userId: string;
+    //     changeType: number;
+    //     changeReason: number;
+    //     quotaBefore: number;
+    //     changeAmount: number;
+    //     quotaAfter: number;
+    // }): Promise<UserQuotaHistory> {
+    //     const userQuotaHistory = await UserQuotaHistory.create({
+    //         user_id: userId,
+    //         change_type: changeType,
+    //         change_reason: changeReason,
+    //         quota_before: quotaBefore,
+    //         change_amount: changeAmount,
+    //         quota_after: quotaAfter,
+    //     });
+    //     return userQuotaHistory;
+    // }
 }
 
 UserQuotaHistory.init(UserQuotaHistorySchema, {

@@ -2,7 +2,7 @@ import { User } from '../../models';
 import { signToken } from '../../lib/token/signToken';
 import { Logger } from '../../lib/logger';
 import { env } from '../../env';
-import { userQuotaHistoryService } from '../user_quota_history';
+import { UserQuotaHistoryService } from '../user_quota_history';
 
 const logger = new Logger(__filename);
 const appId = env.wechatMiniProgram.appid;
@@ -42,8 +42,8 @@ async function generateInviteInfo({ loginUserId, inviteBy }: { loginUserId: stri
     await user.save();
     logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${invitedByUserId}`);
     // update invite user quota
-    await userQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
-    logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
+    // await UserQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
+    // logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
 
     logger.info(`${logPre} success`);
 }

@@ -4,7 +4,7 @@ import { translate } from '../../clients/baidu-translate/BaiduTranslate';
 import { PromptHistory, UserGenerateHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
 import { verifyToken } from '../../lib/token/verifyToken';
-import { userQuotaHistoryService } from '../../general/user_quota_history';
+import { UserQuotaHistoryService } from '../../general/user_quota_history';
 
 const router = express.Router();
 router.use(verifyToken);
@@ -37,7 +37,7 @@ router.post('', async (req: any, res) => {
         /*
          * consume quota
          */
-        await userQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
+        // await UserQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
 
         /*
          * create prompt history record

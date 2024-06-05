@@ -30,7 +30,8 @@ router.get('', async (req: any, res) => {
                  left join prompt_history as ph
                            on ugh.prompt_history_id = ph.id
         WHERE ugh.user_id = '${userId}'
-            ${style ? `AND ugh.style = '${style}'` : ''} ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
+            ${style ? `AND ugh.style = '${style}'` : ''} 
+            ${keyword ? `AND ph.prompt LIKE '%${keyword}%'` : ''}
         ORDER BY ugh.id DESC
         limit ${Number(start)}, ${Number(limit)}`);
     // LIMIT ${Number(start) || 0}, ${Number(limit) || 10};
