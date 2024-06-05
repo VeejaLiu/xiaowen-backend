@@ -3,6 +3,7 @@ import { getGenerateConfig } from './generateConfig';
 import { putObject } from '../minio/minio';
 import { Logger } from '../../lib/logger';
 import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
 
 const fetch = require('node-fetch');
 const log = new Logger(__filename);
@@ -52,10 +53,11 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
     const images = generateResJson.images;
 
     const imagePaths: { original: string; thumbnail: string }[] = [];
+    const uniqueId = uuidv4();
     for (let i = 0; i < images.length; i++) {
         const imageBase64: string = images[i];
         const imageBuffer = Buffer.from(imageBase64, 'base64');
-        const objectName = `${new Date().toISOString()}_${i}`;
+        const objectName = `${new Date().toISOString()}_${uniqueId}_${i}`;
         const imageName = `${objectName}.png`;
         // upload image to minio
         const minioPath = await putObject(imageName, imageBuffer);
