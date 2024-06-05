@@ -2,7 +2,7 @@ import { PromptHistory, User, UserGenerateHistory } from '../../models';
 import { USER_QUOTA_HISTORY_CONSTANT } from '../../constant';
 import { draw } from '../../clients/generate-server/generate';
 import { Logger } from '../logger';
-import { userQuotaHistoryService } from '../../general/user_quota_history';
+import { UserQuotaHistoryService } from '../../general/user_quota_history';
 import { WechatApis } from '../../clients/wechat/WechatApis';
 import { TATTOO_STYLES } from '../../constant/style';
 
@@ -96,8 +96,8 @@ export async function executeTaskFromQueue() {
         });
         logger.info(`[generate-queue][executeTaskFromQueue] Update prompt history status to failed`);
 
-        await userQuotaHistoryService.refundQuotaForGenerate({ userId: generateHistory.user_id });
-        logger.info(`[generate-queue][executeTaskFromQueue] Refund quota`);
+        // await UserQuotaHistoryService.refundQuotaForGenerate({ userId: generateHistory.user_id });
+        // logger.info(`[generate-queue][executeTaskFromQueue] Refund quota`);
         // 发送失败通知
         // await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
     }

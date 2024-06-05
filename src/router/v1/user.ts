@@ -18,14 +18,14 @@ router.get('/info', async (req: any, res) => {
     logger.info(`[API_LOGS][/info] userId: ${userId}`);
 
     const user = await User.findOne({ where: { user_id: userId } });
-    const userQuota = await UserQuota.findOne({ where: { user_id: userId } });
+    // const userQuota = await UserQuota.findOne({ where: { user_id: userId } });
 
     res.status(200).send({
         userId: user.user_id,
         nickname: user.nickname,
         avatarUrl: user.avatar_url,
         createTime: user.create_time,
-        quota: userQuota.quota,
+        // quota: userQuota.quota,
         inviteCode: user.invite_code,
     });
 });

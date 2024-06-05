@@ -1,7 +1,7 @@
 import { WechatApis } from '../../clients/wechat/WechatApis';
 import { User } from '../../models';
 import { v4 as uuidv4 } from 'uuid';
-import { userQuotaHistoryService } from '../user_quota_history';
+import { UserQuotaHistoryService } from '../user_quota_history';
 import { Logger } from '../../lib/logger';
 import { env } from '../../env';
 
@@ -71,7 +71,7 @@ export async function login({ code }: { code: string }): Promise<{
             invite_code: inviteCode,
         });
         logger.info(`[login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
-        await userQuotaHistoryService.initQuota({ userId: user.user_id });
+        // await UserQuotaHistoryService.initQuota({ userId: user.user_id });
 
         result.userId = user.user_id;
         result.nickname = user.nickname;
