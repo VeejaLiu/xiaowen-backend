@@ -57,7 +57,7 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
     for (let i = 0; i < images.length; i++) {
         const imageBase64: string = images[i];
         const imageBuffer = Buffer.from(imageBase64, 'base64');
-        const objectName = `${new Date().toISOString()}_${uniqueId}_${i}`;
+        const objectName = `${uniqueId}_${new Date().toISOString()}_${i}`;
         const imageName = `${objectName}.png`;
         // upload image to minio
         const minioPath = await putObject(imageName, imageBuffer);
