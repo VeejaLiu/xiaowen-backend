@@ -40,3 +40,8 @@ npm i
 npm run start
 ```
 
+PM2启动项目:
+
+```
+pm2 start npm --name "xiaowen-backend" -- run start
+```
