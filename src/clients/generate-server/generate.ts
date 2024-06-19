@@ -68,7 +68,7 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
         if (minioPath === false || thumbnailMinioPath === false) {
             continue;
         }
-        imagePaths.push({ original: minioPath as string, thumbnail: minioPath as string });
+        imagePaths.push({ original: minioPath as string, thumbnail: thumbnailMinioPath as string });
     }
     const parameters = generateResJson.parameters;
     return {
