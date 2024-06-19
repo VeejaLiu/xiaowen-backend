@@ -63,7 +63,7 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
         // upload image to minio
         const minioPath = await putObject(imageName, imageBuffer);
         // create image thumbnail
-        const thumbnailBuffer = await sharp(imageBuffer).resize(200, 200).toBuffer();
+        const thumbnailBuffer = await sharp(imageBuffer).resize(128, 128).toBuffer();
         const thumbnailName = `${objectName}_thumbnail.png`;
         const thumbnailMinioPath = await putObject(thumbnailName, thumbnailBuffer);
         if (minioPath === false || thumbnailMinioPath === false) {
