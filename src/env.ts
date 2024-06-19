@@ -69,4 +69,7 @@ export const env = {
     secret: {
         jwt: getOsEnv('SECRET_JWT'),
     },
+    generateServer: {
+        url: getOsEnv('GENERATE_SERVER_URL'),
+    },
 };

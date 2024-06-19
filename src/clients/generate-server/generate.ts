@@ -4,6 +4,7 @@ import { putObject } from '../minio/minio';
 import { Logger } from '../../lib/logger';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import { env } from '../../env';
 
 const fetch = require('node-fetch');
 const log = new Logger(__filename);
@@ -25,7 +26,7 @@ export async function draw({ style, prompt }: { style: TATTOO_STYLE; prompt: str
     const generateConfig: GenerateConfig = await getGenerateConfig({ style, prompt });
 
     // Send request to generate server
-    const generateRes = await fetch('http://region-42.seetacloud.com:53733/sdapi/v1/txt2img', {
+    const generateRes = await fetch(`${env.generateServer.url}/sdapi/v1/txt2img`, {
         headers: {
             'Content-Type': 'application/json',
         },
