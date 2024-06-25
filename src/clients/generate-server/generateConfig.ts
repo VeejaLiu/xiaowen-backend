@@ -159,10 +159,10 @@ function getMinimalistConfig(description: string): GenerateConfig {
 //     }
 function getGeometricConfig(description: string): GenerateConfig {
     // 正向提示词
-    const prompt = [description, '<lora:geo-1-for-dreamshaper:0.6>', 'geometric', quality_prompt].join(', ');
+    const prompt = [description, '<lora:geo-5-for-dreamshaper:0.6>', 'geometric', quality_prompt].join(', ');
     // 负向提示词
     const negative_prompt = GENERAL_NEGATIVE_PROMPT;
-    const height = 512;
+    const height = 640;
     const width = 512;
     return {
         prompt: prompt,
