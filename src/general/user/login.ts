@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserQuotaHistoryService } from '../user_quota_history';
 import { Logger } from '../../lib/logger';
 import { env } from '../../env';
+import { putObject } from '../../clients/minio/minio';
+const fetch = require('node-fetch');
 
 const logger = new Logger(__filename);
 const appId = env.wechatMiniProgram.appid;
@@ -15,6 +17,25 @@ async function generateInviteCode() {
         return generateInviteCode();
     }
     return inviteCode;
+}
+
+export async function generateAvatarByUserID(id: number) {
+    const user = await User.findByPk(id);
+
+    /*
+     * Download this img and save to user.avatar_url
+     */
+    const url =
+        `https://api.dicebear.com/9.x/pixel-art/png` +
+        `?seed=${id}` +
+        `&size=128` +
+        `&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+    const avatarResponse = await fetch(url);
+    const avatarBuffer = await avatarResponse.buffer();
+    const avatarName = `avatar_${id}.png`;
+    const avatarMinioPath = await putObject(avatarName, avatarBuffer);
+    logger.info(`[generateAvatar] avatarMinioPath: ${avatarMinioPath}`);
+    await user.update({ avatar_url: avatarMinioPath });
 }
 
 export async function login({ code }: { code: string }): Promise<{
@@ -72,6 +93,9 @@ export async function login({ code }: { code: string }): Promise<{
         });
         logger.info(`[login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
         // await UserQuotaHistoryService.initQuota({ userId: user.user_id });
+        generateAvatarByUserID(user.id).then(() => {
+            logger.info(`[login] Generate avatar by userID${user.id} success`);
+        });
 
         result.userId = user.user_id;
         result.nickname = user.nickname;
