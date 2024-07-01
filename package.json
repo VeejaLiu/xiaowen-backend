@@ -9,7 +9,8 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "ts-node src/app.ts"
+        "start": "ts-node src/app.ts",
+        "generateAvatarForAllUser": "ts-node src/scripts/generateAvatar.ts"
     },
     "repository": {
         "type": "git",
