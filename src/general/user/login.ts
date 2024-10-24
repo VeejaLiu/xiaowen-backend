@@ -92,7 +92,7 @@ export async function login({ code }: { code: string }): Promise<{
             invite_code: inviteCode,
         });
         logger.info(`[login] New user created, user_id: ${user.user_id}, openid: ${openid}`);
-        // await UserQuotaHistoryService.initQuota({ userId: user.user_id });
+        await UserQuotaHistoryService.initQuota({ userId: user.user_id });
         generateAvatarByUserID(user.id).then(() => {
             logger.info(`[login] Generate avatar by userID${user.id} success`);
         });

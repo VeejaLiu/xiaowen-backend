@@ -7,6 +7,6 @@
   ],
   // 启用保存时自动修复eslint,默认只支持.js文件
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   }
 }
