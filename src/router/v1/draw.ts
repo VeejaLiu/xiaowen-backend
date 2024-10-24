@@ -37,7 +37,7 @@ router.post('', async (req: any, res) => {
         /*
          * consume quota
          */
-        // await UserQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
+        await UserQuotaHistoryService.consumeQuotaForGenerate({ userId: userId });
 
         /*
          * create prompt history record

@@ -42,8 +42,8 @@ async function generateInviteInfo({ loginUserId, inviteBy }: { loginUserId: stri
     await user.save();
     logger.info(`${logPre} Update user[${loginUserId}] invite user id to ${invitedByUserId}`);
     // update invite user quota
-    // await UserQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
-    // logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
+    await UserQuotaHistoryService.addQuotaForInvite({ userId: invitedByUserId });
+    logger.info(`${logPre} Add quota for user[${invitedByUserId}]`);
 
     logger.info(`${logPre} success`);
 }

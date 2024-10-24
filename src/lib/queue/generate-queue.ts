@@ -36,11 +36,13 @@ async function sendNotification({
 
 export async function executeTaskFromQueue() {
     let generateHistoryId = 0;
+    let promptHistory: PromptHistory;
+    let generateHistory: UserGenerateHistory;
     try {
         /*
          * Get a task from queue
          */
-        const generateHistory = await UserGenerateHistory.findOne({
+        generateHistory = await UserGenerateHistory.findOne({
             where: { status: USER_QUOTA_HISTORY_CONSTANT.STATUS.ONGOING },
             order: [['id', 'ASC']],
         });
@@ -53,7 +55,7 @@ export async function executeTaskFromQueue() {
         );
         generateHistoryId = generateHistory.id;
 
-        const promptHistory = await PromptHistory.findOne({
+        promptHistory = await PromptHistory.findOne({
             where: { id: generateHistory.prompt_history_id },
         });
         if (!promptHistory) {
@@ -96,9 +98,9 @@ export async function executeTaskFromQueue() {
         );
         logger.info(`[generate-queue][executeTaskFromQueue] Update prompt history status to failed`);
 
-        // await UserQuotaHistoryService.refundQuotaForGenerate({ userId: generateHistory.user_id });
-        // logger.info(`[generate-queue][executeTaskFromQueue] Refund quota`);
+        await UserQuotaHistoryService.refundQuotaForGenerate({ userId: generateHistory.user_id });
+        logger.info(`[generate-queue][executeTaskFromQueue] Refund quota`);
         // 发送失败通知
-        // await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
+        await sendNotification({ userGenerateHistory: generateHistory, promptHistory: promptHistory, success: true });
     }
 }
