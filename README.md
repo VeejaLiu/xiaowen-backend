@@ -45,3 +45,5 @@ PM2启动项目:
 ```
 pm2 start npm --name "xiaowen-backend" -- run start
 ```
+
+<!-- Security scan triggered at 2026-09-05 07:37:54 -->
